@@ -1,5 +1,5 @@
 #include <iostream>
-
+#include <iomanip>
 #include "FourierSeries.h"
 
 using namespace MCMC;
@@ -7,6 +7,10 @@ using namespace MCMC;
 FourierSeries::FourierSeries( int M_ ) : M(M_), total_modes( (2*M_+1)*(2*M_+1) )
 {
     modes = Tensor<ComplexType, 2>( 2*M+1, 2*M+1 );
+}
+
+FourierSeries::FourierSeries()
+{
 }
 
 FourierSeries::~FourierSeries()
@@ -100,7 +104,9 @@ void FourierSeries::print_modes()
         for( int i=-M; i<M+1; ++i )
         {
             mode = get_mode(i,j);
-            std::cout<< mode;
+            std::cout<< std::fixed;
+            std::cout<< std::setprecision(2);
+            std::cout << mode << "\t\t";
         }
         std::cout<< std::endl;
     }

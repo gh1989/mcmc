@@ -9,9 +9,9 @@ double LangevinPathSchemeImp::log_path_ratio()
     FourierSeries v_star = params().potential_star();
 
     // Diffusion sigma
-    double d_sigma = opts.diffusion_coefficient();  
+    double sigma = opts.diffusion_coefficient();  
     double dt = opts.trajectory_path_delta(); 
-    double diff_const = (0.5 / (d_sigma*d_sigma*dt));
+    double diff_const = (0.5 / (sigma*sigma*dt));
 
     // Observation variance
     double o_variance = opts.observation_noise_variance();
@@ -35,7 +35,6 @@ double LangevinPathSchemeImp::log_path_ratio()
 
             log_total += obs_const * pow( current(k, l, 0, 0 ) - observed(k, l, 0), 2);
             log_total += obs_const * pow( current(k, l, 0, 1 ) - observed(k, l, 1), 2);
-
             for( size_t m=1; m<M; ++m )
             {
                 xt << proposed(k, l, m, 0 ), proposed(k, l, m, 1 );
