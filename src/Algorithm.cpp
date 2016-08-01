@@ -3,6 +3,7 @@
 
 using namespace MCMC;
 
+/*
 void Algorithm::run( gsl_rng *r )
 {
     double log_a;
@@ -42,4 +43,4 @@ void Algorithm::run( gsl_rng *r )
 
     std::cout<< "Accepted: " << double(acceptance_rate)/double(N) << std::endl;
     algo_scheme.finish();
-}
+}*/

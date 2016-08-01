@@ -1,5 +1,5 @@
 #include "Options.h"
-#include "OUPathScheme.h"
+#include "OUDynamics.h"
 #include "lest/lest.hpp"
 
 using namespace std;
@@ -11,7 +11,7 @@ const lest::test specification[] =
     {
         int argc=0;
         char **argv;
-        Options opts(argc, argv);
+        Options<OUDynamics> opts(argc, argv);
 
     },
 
@@ -21,7 +21,7 @@ const lest::test specification[] =
         char *argv[3];
         argv[1] = (char*)"-R";
         argv[2] = (char*)"42";
-        Options opts(argc, argv);
+        Options<OUDynamics> opts(argc, argv);
 
         EXPECT( 42 == opts.rng_seed() );
     },
@@ -32,7 +32,7 @@ const lest::test specification[] =
         char *argv[3];
         argv[1] = (char*)"-N";
         argv[2] = (char*)"144758";
-        Options opts(argc, argv);
+        Options<OUDynamics> opts(argc, argv);
 
         EXPECT( 144758 == opts.mcmc_trials() );
     },
@@ -43,7 +43,7 @@ const lest::test specification[] =
         char *argv[3];
         argv[1] = (char*)"-P";
         argv[2] = (char*)"11234";
-        Options opts(argc, argv);
+        Options<OUDynamics> opts(argc, argv);
 
         EXPECT( 11234 == opts.path_length() ); 
 
@@ -55,7 +55,7 @@ const lest::test specification[] =
         char *argv[3];
         argv[1] = (char*)"-M";
         argv[2] = (char*)"42";
-        Options opts(argc, argv);
+        Options<OUDynamics> opts(argc, argv);
 
         EXPECT( 42 == opts.extra_data_ratio() ); 
 
@@ -67,7 +67,7 @@ const lest::test specification[] =
         char *argv[3];
         argv[1] = (char*)"-K";
         argv[2] = (char*)"42";
-        Options opts(argc, argv);
+        Options<OUDynamics> opts(argc, argv);
 
         EXPECT( 42 == opts.parallel_paths() ); 
 
@@ -79,7 +79,7 @@ const lest::test specification[] =
         char *argv[3];
         argv[1] = (char*)"-B";
         argv[2] = (char*)"10001";
-        Options opts(argc, argv);
+        Options<OUDynamics> opts(argc, argv);
 
         EXPECT( 10001 == opts.burn() ); 
     },
@@ -88,7 +88,7 @@ const lest::test specification[] =
     {
         int argc=0;
         char **argv;
-        Options opts(argc, argv);
+        Options<OUDynamics> opts(argc, argv);
         opts.parameters();
     },
 
@@ -98,7 +98,7 @@ const lest::test specification[] =
         char *argv[3];
         argv[1] = (char*)"-c";
         argv[2] = (char*)"50.50";
-        Options opts(argc, argv);
+        Options<OUDynamics> opts(argc, argv);
         EXPECT( 50.50 == opts.parameter_proposal_variance() ); 
     },
 
@@ -108,7 +108,7 @@ const lest::test specification[] =
         char *argv[3];
         argv[1] = (char*)"-o";
         argv[2] = (char*)"0.4111";
-        Options opts(argc, argv);
+        Options<OUDynamics> opts(argc, argv);
 
         EXPECT( 0.4111 == opts.observation_noise_variance() ); 
     },
@@ -119,7 +119,7 @@ const lest::test specification[] =
         char *argv[3];
         argv[1] = (char*)"-p";
         argv[2] = (char*)"0.42";
-        Options opts(argc, argv);
+        Options<OUDynamics> opts(argc, argv);
         EXPECT( 0.42 == opts.trajectory_path_delta() ); 
     },
 
@@ -129,7 +129,7 @@ const lest::test specification[] =
         char *argv[3];
         argv[1] = (char*)"-d";
         argv[2] = (char*)"0.5";
-        Options opts(argc, argv);
+        Options<OUDynamics> opts(argc, argv);
         EXPECT( 0.5 == opts.diffusion_coefficient() );
     },
 

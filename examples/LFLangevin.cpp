@@ -1,13 +1,13 @@
 #include <iostream>
 
 #include "Algorithm.h"
-#include "LikelihoodFreeScheme.h"
+#include "LikelihoodFreeMCMC.h"
 #include "Options.h"
-#include "LangevinPathScheme.h"
+#include "LangevinDynamics.h"
 
 /*
 
-OUPathScheme hard-coded constant: true_c = 1.70;
+OUDynamics hard-coded constant: true_c = 1.70;
 
 set _mcmc_trials                    = 10000
 set _trajectory_path_delta          = 0.02
@@ -26,16 +26,18 @@ using namespace MCMC;
 
 int main( int argc, char *argv[] )
 {
-    Options opts( argc, argv );
+    Options<LangevinDynamics> opts( argc, argv );
 
     gsl_rng *r;
     gsl_rng_env_setup();
     r = gsl_rng_alloc( gsl_rng_default );
     gsl_rng_set( r, opts.rng_seed() );
- 
-    LangevinPathScheme langevin_scheme( opts );
-    LikelihoodFreeScheme lf_langevin( opts,  langevin_scheme );
-    Algorithm algo( opts, lf_langevin );
+
+    LangevinDynamics::ParameterType real_parameters( 4 );
+    real_parameters(3) = ComplexType( 0.5, -0.5 );
+    opts.set_parameters( real_parameters ); 
+
+    Algorithm<LikelihoodFreeMCMC, LangevinDynamics> algo( opts );
     
     algo.run(r);
     

@@ -29,7 +29,22 @@ void FourierSeries::set_mode( int i, int j, ComplexType mode)
     modes(ii , jj ) = std::conj(mode);
 }
 
+void FourierSeries::set_modes( Tensor<ComplexType, 1> &c )
+{
+    int idx;
 
+    int ii;
+    int jj; 
+   
+    for( size_t i=1; i<M+1; ++i )
+        set_mode( i, 0, c(i-1) );
+
+    for( int i=-M; i<M+1; ++i )
+        for( size_t j=1; j<M+1; ++j ){ 
+            idx = M + (j-1)*(2*M+1) + (i+M);
+            set_mode( i, j, c( idx ) );
+        }
+}
 
 ComplexType FourierSeries::get_mode( int i, int j )
 {

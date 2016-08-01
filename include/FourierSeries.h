@@ -23,7 +23,7 @@ class FourierSeries
 {
 public:
     FourierSeries(int M_);
-    //FourierSeries(){};
+    FourierSeries();
     ~FourierSeries();
 
     Vector2d grad( Vector2d );
@@ -33,6 +33,7 @@ public:
     double evaluate( double x, double y );
 
     void set_mode( int i, int j, ComplexType );
+    void set_modes( Tensor<ComplexType, 1> &c );
     ComplexType get_mode( int, int );
 
     void print_modes();
