@@ -60,7 +60,7 @@ class LangevinDynamics  : public DynamicsBase {
             M = o.cutoff();
             int D = 2*M*(M+1);
             ParameterType real_c(D);
-            //real_c(D-1) = ComplexType(0.5, -0.5);
+            real_c(D-1) = ComplexType(0.5, -0.5);
             return real_c;
         }
 

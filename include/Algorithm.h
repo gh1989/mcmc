@@ -50,7 +50,6 @@ void Algorithm<AlgoType, Dynamics>::run( gsl_rng *r )
 
     algo_scheme.generate_true_trajectory(r);
     algo_scheme.generate_observations(r);
-    std::cout<<"Here 123"<<std::endl;
 
     for(size_t n=0; n<N; ++n)
     {   

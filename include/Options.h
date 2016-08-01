@@ -136,11 +136,8 @@ Options<Dynamics>::Options( int argc, char *argv[] )
 
         }
     }
-    std::cout<<"Here 1."<<std::endl;
-
     _parameters = Dynamics::default_parameters(*this);
 
-    std::cout<<"Here 2."<<std::endl;
 }
 
 #endif // End OPTIONS_H

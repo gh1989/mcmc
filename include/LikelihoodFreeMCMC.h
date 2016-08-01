@@ -29,8 +29,6 @@ public:
 
     LikelihoodFreeMCMC(Options<Dynamics_>& o) : opts(o), dynamics(o)
     {
-        std::cout<<"LikelihoodFreeMCMC(Options<Dynamics_>& o) Here."<<std::endl;  
-
         // Required options
         int K = opts.parallel_paths();
         int L = opts.path_length();
@@ -51,13 +49,10 @@ public:
         c_star  = ParameterType(c_dim);
         real_c  = opts.parameters();
         chain   = ParameterChainType(N, c_dim);
-
-        std::cout<<"Finished LikelihoodFreeMCMC(Options<Dynamics_>& o)"<<std::endl;
     }
 
     LikelihoodFreeMCMC()
     {
-        std::cout<<"LikelihoodFreeMCMC() Here."<<std::endl;  
         // Default options.
         // opts = Options<Dynamics_>();
         // LikelihoodFreeMCMC(opts);
@@ -113,17 +108,14 @@ void LikelihoodFreeMCMC<Dynamics_>::propose_parameters(gsl_rng *r)
 template<typename Dynamics_>
 void LikelihoodFreeMCMC<Dynamics_>::generate_true_trajectory(gsl_rng *r)
 { 
-    std::cout<<"begin LikelihoodFreeMCMC<Dynamics_>::generate_true_trajectory"<<std::endl;
     dynamics.generate_random_starts( r, real );
-    std::cout<<"Done random starts..."<<std::endl;
     dynamics.trajectory(r, real_c, real );
-    std::cout<<"leave LikelihoodFreeMCMC<Dynamics_>::generate_true_trajectory"<<std::endl;
+
 }
 
 template<typename Dynamics_>
 void LikelihoodFreeMCMC<Dynamics_>::generate_observations(gsl_rng *r)
 {   
-    std::cout<<"begin LikelihoodFreeMCMC<Dynamics_>::generate_observations"<<std::endl;
     double variance = opts.observation_noise_variance();
 
     double random_noise_x;
@@ -143,7 +135,6 @@ void LikelihoodFreeMCMC<Dynamics_>::generate_observations(gsl_rng *r)
             observed(k, l, 1 ) = real(k, l, 0, 1 ) + random_noise_y;
         }   
     }
-    std::cout<<"leave LikelihoodFreeMCMC<Dynamics_>::generate_observations"<<std::endl;
 }
 
 template<typename Dynamics_>
