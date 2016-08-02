@@ -7,7 +7,10 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/${EXT_PROJECTS_DIR}/bin)
 
 add_executable(LFOrnsteinUhlenbeck LFOrnsteinUhlenbeck.cpp)
-target_link_libraries( LFOrnsteinUhlenbeck gsl gslcblas Algorithm LikelihoodFreeScheme Options OUPathScheme OUParams FourierSeries)
+target_link_libraries( LFOrnsteinUhlenbeck gsl gslcblas LikelihoodFreeMCMC Options OUDynamics FourierSeries)
 
 add_executable(LFLangevin LFLangevin.cpp)
-target_link_libraries( LFLangevin gsl gslcblas Algorithm LikelihoodFreeScheme Options LangevinPathScheme LangevinParams FourierSeries)
+target_link_libraries( LFLangevin gsl gslcblas LikelihoodFreeMCMC Options LangevinDynamics FourierSeries)
+
+add_executable(SequentialLFMCMCLangevin SequentialLFMCMC.cpp)
+target_link_libraries(SequentialLFMCMCLangevin gsl gslcblas SequentialLFMCMC Options LangevinDynamics FourierSeries)
