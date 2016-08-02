@@ -1,7 +1,11 @@
-#ifndef LANGEVIN_PATH_SCHEME_H
-#define LANGEVIN_PATH_SCHEME_H
+#ifndef LANGEVIN_DYNAMICS_H
+#define LANGEVIN_DYNAMICS_H
 
 #include <iostream>
+
+#ifndef M_PI
+    #define M_PI 3.14159265359
+#endif
 
 #include <Eigen/Dense>
 #include <Eigen/CXX11/Tensor>
@@ -60,6 +64,8 @@ class LangevinDynamics  : public DynamicsBase {
             M = o.cutoff();
             int D = 2*M*(M+1);
             ParameterType real_c(D);
+            for(size_t i=0; i<D; ++i)
+                real_c(i) = ComplexType(0, 0);
             real_c(D-1) = ComplexType(0.5, -0.5);
             return real_c;
         }

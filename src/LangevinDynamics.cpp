@@ -20,9 +20,9 @@ double LangevinDynamics::log_prior_ratio(ParameterType &c_star, ParameterType &c
     double var = opts.parameter_proposal_variance();
     double normal_constant = 0.5 / var;
 
-    int defining_modes = parameter_dimension();
+    int c_dim = parameter_dimension();
 
-    for( size_t i=0; i<defining_modes; ++i)
+    for( size_t i=0; i<c_dim; ++i)
         log_total -= normal_constant*( pow( std::abs(c_star(i)), 2) - pow( std::abs(c(i)), 2) );
 
     return log_total;
@@ -59,7 +59,7 @@ double LangevinDynamics::log_path_likelihood(   PathType &x,
         {
             log_total -= obs_const * pow( x(k, l, 0, 0 ) - y(k, l, 0), 2);
             log_total -= obs_const * pow( x(k, l, 0, 1 ) - y(k, l, 1), 2);
-
+            
             for( size_t m=1; m<M; ++m )
             {
                 xt << x(k, l, m, 0 ), x(k, l, m, 1 );
@@ -67,7 +67,7 @@ double LangevinDynamics::log_path_likelihood(   PathType &x,
                 gradvtminus1 = V.grad( xtminus1 ); 
 
                 log_total -= diff_const * pow( xt(0)-xtminus1(0)+gradvtminus1(0)*dt, 2);
-                log_total -= diff_const * pow( xt(0)-xtminus1(1)+gradvtminus1(1)*dt, 2);
+                log_total -= diff_const * pow( xt(1)-xtminus1(1)+gradvtminus1(1)*dt, 2);
 
             }
         }
@@ -103,7 +103,7 @@ void LangevinDynamics::trajectory( gsl_rng *r, ParameterType &c, PathType &out )
     
     FourierSeries V(_cutoff);
     V.set_modes( c );    
-
+        
     double dt = opts.trajectory_path_delta();
     double sigma = opts.diffusion_coefficient();    
 
@@ -137,7 +137,7 @@ void LangevinDynamics::trajectory( gsl_rng *r, ParameterType &c, PathType &out )
 
             xtminus1 << out(k, l, M-1, 0 ), out(k, l, M-1, 1 );
             gradtminus1 = V.grad( xtminus1 );
-    
+                
             out(k, l+1, 0, 0) = xtminus1(0)-gradtminus1(0)*dt + random_noise_x;
             out(k, l+1, 0, 1) = xtminus1(1)-gradtminus1(1)*dt + random_noise_y;
 

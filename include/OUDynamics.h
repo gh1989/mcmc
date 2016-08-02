@@ -1,6 +1,10 @@
 #ifndef OU_DYNAMICS_H
 #define OU_DYNAMICS_H
 
+#ifndef M_PI
+    #define M_PI 3.14159265359
+#endif
+
 #include <Eigen/Dense>
 #include <Eigen/CXX11/Tensor>
 

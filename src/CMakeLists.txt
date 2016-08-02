@@ -9,9 +9,9 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/${EXT_PROJECTS_DIR}/bin)
 
 include_directories(${MCMC_SOURCE_DIR}/include)
 
-add_library(fftw3 STATIC IMPORTED /usr/local/lib/libfftw3.a)
-add_library(gsl STATIC IMPORTED /usr/local/lib/libgsl.a)
-add_library(gslcblas STATIC IMPORTED /usr/local/lib/libgslcblas.a)
+#add_library(fftw3 STATIC IMPORTED /usr/local/lib/libfftw3.a)
+#add_library(gsl STATIC IMPORTED /usr/local/lib/libgsl.a)
+#add_library(gslcblas STATIC IMPORTED /usr/local/lib/libgslcblas.a)
 
 add_library(FourierSeries FourierSeries.cpp)
 

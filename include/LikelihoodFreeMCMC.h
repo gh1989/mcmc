@@ -3,6 +3,10 @@
 
 #include <iostream>
 
+#ifndef M_PI
+    #define M_PI 3.14159265359
+#endif
+
 #include <Eigen/Dense>
 #include <Eigen/CXX11/Tensor>
 
@@ -35,8 +39,6 @@ public:
         int M = opts.extra_data_ratio();
         int N = opts.mcmc_trials();
         int c_dim = dynamics.parameter_dimension(o);
-        
-        std::cout<<"Here."<<std::endl;
 
         // The trajectories
         observed    = CoarsePathType( K, L, 2 );
@@ -131,7 +133,7 @@ void LikelihoodFreeMCMC<Dynamics_>::generate_observations(gsl_rng *r)
             random_noise_y = gsl_ran_gaussian(r, variance );
             random_noise_x = gsl_ran_gaussian(r, variance );                
 
-            observed(k, l, 0 ) = real(k, l, 0, 0 ) + random_noise_x;
+            observed(k, l, 0 ) = real(k, l, 0, 0 ) + random_noise_x;           
             observed(k, l, 1 ) = real(k, l, 0, 1 ) + random_noise_y;
         }   
     }
@@ -153,13 +155,24 @@ void LikelihoodFreeMCMC<Dynamics_>::store_chain(int n)
 
 }
 template<typename Dynamics_>
-void LikelihoodFreeMCMC<Dynamics_>::accept() {
-    x = x_star;
+void LikelihoodFreeMCMC<Dynamics_>::accept() 
+{
+    int K = opts.parallel_paths();
+    int L = opts.path_length();
+    int M = opts.extra_data_ratio();
+    
+    for( size_t k=0; k<K; ++k)
+        for( size_t l=0; l<L; ++l)
+            for( size_t m=0; m<M; ++m)
+                for( size_t i=0; i<2; ++i)
+                    x(k,l,m,i) = x_star(k,l,m,i);
+    
     c = c_star;
 }
  
 template<typename Dynamics_>
-void LikelihoodFreeMCMC<Dynamics_>::finish() {
+void LikelihoodFreeMCMC<Dynamics_>::finish() 
+{
     dynamics.output_file_timeseries( chain );
 }
           
@@ -169,6 +182,7 @@ double LikelihoodFreeMCMC<Dynamics_>::log_path_ratio()
     double log_total = 0;
     log_total += dynamics.log_path_likelihood( x_star, c_star, observed );
     log_total -= dynamics.log_path_likelihood( x, c, observed );
+      
     return log_total;
 }
       

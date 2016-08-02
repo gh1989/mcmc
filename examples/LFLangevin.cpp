@@ -6,9 +6,6 @@
 #include "LangevinDynamics.h"
 
 /*
-
-OUDynamics hard-coded constant: true_c = 1.70;
-
 set _mcmc_trials                    = 10000
 set _trajectory_path_delta          = 0.02
 set _parallel_paths                 = 25
@@ -20,6 +17,7 @@ set _diffusion_coefficient          = 0.001
 set _burn                           = 0;
 set _rng_seed                       = 0;
 set _parameters                     = 1;
+-N 10000 -p 0.001 -K 25 -M 1 -o 0.1 -L 16 -c 0.1 -d 0.001
 */
 
 using namespace MCMC;
@@ -32,10 +30,6 @@ int main( int argc, char *argv[] )
     gsl_rng_env_setup();
     r = gsl_rng_alloc( gsl_rng_default );
     gsl_rng_set( r, opts.rng_seed() );
-
-    LangevinDynamics::ParameterType real_parameters( 4 );
-    real_parameters(3) = ComplexType( 0.5, -0.5 );
-    opts.set_parameters( real_parameters ); 
 
     Algorithm<LikelihoodFreeMCMC, LangevinDynamics> algo( opts );
     

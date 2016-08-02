@@ -7,6 +7,10 @@ using namespace MCMC;
 FourierSeries::FourierSeries( int M_ ) : M(M_), total_modes( (2*M_+1)*(2*M_+1) )
 {
     modes = Tensor<ComplexType, 2>( 2*M+1, 2*M+1 );
+    
+    for(size_t i=0; i<2*M+1; ++i)
+        for(size_t j=0; j<2*M+1; ++j)
+            modes(i,j) = ComplexType(0,0);
 }
 
 FourierSeries::FourierSeries()
@@ -40,7 +44,8 @@ void FourierSeries::set_modes( Tensor<ComplexType, 1> &c )
         set_mode( i, 0, c(i-1) );
 
     for( int i=-M; i<M+1; ++i )
-        for( size_t j=1; j<M+1; ++j ){ 
+        for( size_t j=1; j<M+1; ++j )
+        { 
             idx = M + (j-1)*(2*M+1) + (i+M);
             set_mode( i, j, c( idx ) );
         }
@@ -60,8 +65,8 @@ Vector2d FourierSeries::grad( double x, double y )
 {    
     Vector2d ret;
     
-    ComplexType x_component;
-    ComplexType y_component;    
+    ComplexType x_component(0,0);
+    ComplexType y_component(0,0);    
     ComplexType mode;
     ComplexType tmp;
     
