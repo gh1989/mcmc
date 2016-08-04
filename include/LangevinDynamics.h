@@ -35,6 +35,12 @@ class LangevinDynamics  : public DynamicsBase {
 
         LangevinDynamics(Options<LangevinDynamics> &o): opts(o)
         {
+             _d_sigma = opts.diffusion_coefficient();  
+             _dt = opts.trajectory_path_delta();
+             _d_variance = _d_sigma*_d_sigma*_dt;
+             _d_const = (0.5 / _d_variance);
+             _o_variance = opts.observation_noise_variance();
+             _o_const = (0.5 / _o_variance);
              _cutoff = opts.cutoff();
              _parameter_dimension = 2*_cutoff*(_cutoff+1);
         }
@@ -49,14 +55,14 @@ class LangevinDynamics  : public DynamicsBase {
         }
 
         void output_file_timeseries(ParameterChainType &ccc);
-        void trajectory( gsl_rng *r, ParameterType &c, PathType &out );
         ComplexType sample_transition_density(gsl_rng *r, ComplexType c );
-        void setup_observed_starts( gsl_rng *r, CoarsePathType &y, PathType &out );
-        void generate_random_starts( gsl_rng *r, PathType &out );
-
-        double log_prior_ratio(ParameterType &c_star, ParameterType &c);
-        double log_transition_density_ratio(ParameterType &c_star, ParameterType &c);
-        double log_path_likelihood( PathType &x, ParameterType &c, CoarsePathType &y );
+        void forward_sim( gsl_rng *r, ParameterType &c, int k, int l, int m, PathType &out );
+        double log_prior(ParameterType &c);
+        double log_transition(ParameterType &c_star, ParameterType &c);
+        double log_path_likelihood( PathType &x, 
+                                    ParameterType &c, 
+                                    CoarsePathType &y,
+                                    int k, int l, int m );
 
         static ParameterType default_parameters( Options<LangevinDynamics>& o )
         {
@@ -75,6 +81,12 @@ class LangevinDynamics  : public DynamicsBase {
         Options<LangevinDynamics> opts;
         int _cutoff;
         int _parameter_dimension;
+        double _d_sigma;
+        double _dt;
+        double _d_variance; 
+        double _d_const;
+        double _o_variance;
+        double _o_const;
 
 
 }; // end of class LangevinDynamics
