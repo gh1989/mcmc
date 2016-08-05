@@ -14,6 +14,6 @@ int main( int argc, char *argv[] )
     gsl_rng_env_setup();
     r = gsl_rng_alloc( gsl_rng_default );
     gsl_rng_set( r, opts.rng_seed() );
-    //Algorithm<SequentialLFMCMC, LangevinDynamics> algo( opts );
-    //algo.run(r);   
+    Algorithm<SequentialLFMCMC, LangevinDynamics> algo( opts );
+    algo.run(r);   
 }

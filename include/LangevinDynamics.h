@@ -27,8 +27,9 @@ namespace MCMC
 class LangevinDynamics  : public DynamicsBase {
     public:
     
-        typedef Tensor<ComplexType, 1> ParameterType;
-        typedef Tensor<ComplexType, 2> ParameterChainType;
+        typedef ComplexType ParameterPointType;    
+        typedef Tensor<ParameterPointType, 1> ParameterType;
+        typedef Tensor<ParameterPointType, 2> ParameterChainType;
 
         typedef Tensor<double, 3> CoarsePathType;
         typedef Tensor<double, 4> PathType;    

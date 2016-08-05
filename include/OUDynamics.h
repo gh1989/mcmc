@@ -24,8 +24,9 @@ namespace MCMC
 class OUDynamics : public DynamicsBase
 {
     public:
-        typedef Tensor<double, 1> ParameterType;
-        typedef Tensor<double, 2> ParameterChainType;
+        typedef double ParameterPointType;    
+        typedef Tensor<ParameterPointType, 1> ParameterType;
+        typedef Tensor<ParameterPointType, 2> ParameterChainType;
 
         typedef Tensor<double, 3> CoarsePathType;
         typedef Tensor<double, 4> PathType;    

@@ -69,9 +69,11 @@ public:
     
 
     void propose_parameters(gsl_rng *r);
+    void propose_trajectory(gsl_rng *r);
+    void propose(gsl_rng *r);
     void generate_true_trajectory(gsl_rng *r);
     void generate_observations(gsl_rng *r);
-    void propose_trajectory(gsl_rng *r);
+
     void setup_observed_starts( gsl_rng *r, CoarsePathType &y, PathType &out );
     void generate_random_starts( gsl_rng *r, PathType &out );
     void trajectory( gsl_rng *r, ParameterType &c, PathType &out );
@@ -125,6 +127,13 @@ void LikelihoodFreeMCMC<Dynamics_>::propose_parameters(gsl_rng *r)
 }   
 
 template<typename Dynamics_>
+void LikelihoodFreeMCMC<Dynamics_>::propose( gsl_rng *r )
+{
+    propose_parameters(r);
+    propose_trajectory(r);
+}
+
+template<typename Dynamics_>
 void LikelihoodFreeMCMC<Dynamics_>::generate_true_trajectory(gsl_rng *r)
 { 
     generate_random_starts( r, real );
@@ -171,8 +180,8 @@ void LikelihoodFreeMCMC<Dynamics_>::setup_observed_starts( gsl_rng *r,
     double variance = opts.observation_noise_variance();
     for( size_t k=0; k<K; ++k )
     {
-        out(k, 0, 0, 0 ) = y(k, 0, 0) + gsl_ran_gaussian(r, variance);
-        out(k, 0, 0, 1 ) = y(k, 0, 1) + gsl_ran_gaussian(r, variance);
+        out(k, 0, 0, 0 ) = y(k, 0, 0); //+ gsl_ran_gaussian(r, variance);
+        out(k, 0, 0, 1 ) = y(k, 0, 1); //+ gsl_ran_gaussian(r, variance);
     }
 }
 
@@ -181,7 +190,7 @@ void LikelihoodFreeMCMC<Dynamics_>::trajectory( gsl_rng *r,
                                                 ParameterType &c, 
                                                 PathType &out )
 {
-    for( size_t k=0; k<K;   ++k )
+    for( size_t k=0; k<K; ++k )
       for( size_t l=0; l<L-1; ++l )
       {
         for( size_t m=1; m<M; ++m )
@@ -196,7 +205,7 @@ template<typename Dynamics_>
 void LikelihoodFreeMCMC<Dynamics_>::propose_trajectory(gsl_rng *r) 
 {
     setup_observed_starts(r, observed, x_star );
-    trajectory(r, c_star, x_star );
+    trajectory( r, c_star, x_star );
 }
 
 template<typename Dynamics_>

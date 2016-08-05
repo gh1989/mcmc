@@ -57,8 +57,7 @@ void Algorithm<AlgoType, Dynamics>::run( gsl_rng *r )
 
     for(size_t n=0; n<N; ++n)
     {   
-        algo_scheme.propose_parameters(r);
-        algo_scheme.propose_trajectory(r);
+        algo_scheme.propose(r);
         
         log_u = log( gsl_rng_uniform(r) );
         log_a = algo_scheme.log_acceptance_probability();   
