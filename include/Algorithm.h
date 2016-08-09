@@ -25,17 +25,17 @@ template <template <class A> class AlgoType, class Dynamics>
 class Algorithm
 {
     public:
-        Algorithm( Options<Dynamics>& o ) : _opts(o)
+        Algorithm( Options& o ) : _opts(o)
         {
             algo_scheme = AlgoType<Dynamics>(o);
         }
         ~Algorithm(){};
         void run( gsl_rng *r );
 
-        Options<Dynamics> opts(){ return _opts; }
+        Options opts(){ return _opts; }
 
     private:
-        Options<Dynamics> _opts;
+        Options _opts;
         AlgoType<Dynamics> algo_scheme;
 };
 
@@ -66,12 +66,8 @@ void Algorithm<AlgoType, Dynamics>::run( gsl_rng *r )
         if( log_u < log_a )
         {
            acceptance_rate += 1.0;         
-           std::cout<<"Accept ("<<double(acceptance_rate)/double(n)<<")"<<std::endl;          
+           std::cout<<"Accept ("<<double(acceptance_rate)/double(n+1)<<")"<<std::endl;          
            algo_scheme.accept();
-        }
-        else
-        {
-            std::cout<<"Reject ("<<double(n-acceptance_rate)/double(n)<<")"<<std::endl;     
         }
         algo_scheme.store_chain(n);
         

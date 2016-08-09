@@ -9,7 +9,7 @@ using namespace MCMC;
 
 int main( int argc, char *argv[] )
 {
-    Options<LangevinDynamics> opts( argc, argv );
+    Options opts( argc, argv );
     gsl_rng *r;
     gsl_rng_env_setup();
     r = gsl_rng_alloc( gsl_rng_default );

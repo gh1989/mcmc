@@ -17,6 +17,7 @@ using namespace Eigen;
 
 #include "FourierSeries.h"
 #include "Options.h"
+#include "Parameters.h"
 #include "Dynamics.h"
 
 using namespace MCMC;
@@ -33,23 +34,17 @@ class LangevinDynamics  : public DynamicsBase {
 
         typedef Tensor<double, 3> CoarsePathType;
         typedef Tensor<double, 4> PathType;    
-
-        LangevinDynamics(Options<LangevinDynamics> &o): opts(o)
+        
+        LangevinDynamics(Options &o): opts(o), DynamicsBase(o)
         {
-             _d_sigma = opts.diffusion_coefficient();  
-             _dt = opts.trajectory_path_delta();
-             _d_variance = _d_sigma*_d_sigma*_dt;
-             _d_const = (0.5 / _d_variance);
-             _o_variance = opts.observation_noise_variance();
-             _o_const = (0.5 / _o_variance);
              _cutoff = opts.cutoff();
              _parameter_dimension = 2*_cutoff*(_cutoff+1);
         }
 
-        LangevinDynamics(){}
+        LangevinDynamics() : DynamicsBase() {}
 
         int parameter_dimension(){ return _parameter_dimension; }
-        int parameter_dimension( const Options<LangevinDynamics>& o )
+        int parameter_dimension( const Options& o )
         {
             _cutoff = opts.cutoff();
             return 2*_cutoff*(_cutoff+1);
@@ -57,15 +52,16 @@ class LangevinDynamics  : public DynamicsBase {
 
         void output_file_timeseries(ParameterChainType &ccc);
         ComplexType sample_transition_density(gsl_rng *r, ComplexType c );
-        void forward_sim( gsl_rng *r, ParameterType &c, int k, int l, int m, PathType &out );
+        void forward_sim( gsl_rng *r, ParameterType &c, double sigma, int k, int l, int m, PathType &out );
         double log_prior(ParameterType &c);
         double log_transition(ParameterType &c_star, ParameterType &c);
         double log_path_likelihood( PathType &x, 
                                     ParameterType &c, 
+                                    double sigma,
                                     CoarsePathType &y,
                                     int k, int l, int m );
 
-        static ParameterType default_parameters( Options<LangevinDynamics>& o )
+        static ParameterType default_parameters( Options& o )
         {
             int M;
             M = o.cutoff();
@@ -76,18 +72,11 @@ class LangevinDynamics  : public DynamicsBase {
             real_c(D-1) = ComplexType(0.5, -0.5);
             return real_c;
         }
-
+        
     
     protected:
-        Options<LangevinDynamics> opts;
+        Options opts;
         int _cutoff;
-        int _parameter_dimension;
-        double _d_sigma;
-        double _dt;
-        double _d_variance; 
-        double _d_const;
-        double _o_variance;
-        double _o_const;
 
 
 }; // end of class LangevinDynamics

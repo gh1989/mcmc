@@ -29,4 +29,3 @@ target_link_libraries( SequentialLFMCMC FourierSeries )
 add_library(Options Options.cpp)
 
 add_library(OUDynamics OUDynamics.cpp)
-

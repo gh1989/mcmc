@@ -30,15 +30,9 @@ class OUDynamics : public DynamicsBase
 
         typedef Tensor<double, 3> CoarsePathType;
         typedef Tensor<double, 4> PathType;    
-
-        OUDynamics(Options<OUDynamics>& o): opts(o)
+        
+        OUDynamics(Options& o): opts(o), DynamicsBase(o)
         {
-            _d_sigma = opts.diffusion_coefficient();  
-            _dt = opts.trajectory_path_delta();
-            _d_variance = _d_sigma*_d_sigma*_dt;
-            _d_const = (0.5 / _d_variance);
-            _o_variance = opts.observation_noise_variance();
-            _o_const = (0.5 / _o_variance);
             _parameter_dimension = 1;
         }
 
@@ -48,23 +42,26 @@ class OUDynamics : public DynamicsBase
         }
 
         int parameter_dimension(){ return _parameter_dimension; }
-        int parameter_dimension( const Options<OUDynamics>& o ){ return _parameter_dimension; }
+        int parameter_dimension( const Options& o ){ return _parameter_dimension; }
 
         void output_file_timeseries(ParameterChainType &ccc);
         double sample_transition_density(gsl_rng *r, double c );
 
-        void forward_sim( gsl_rng *r, ParameterType &c,
+        void forward_sim( gsl_rng *r, 
+                          ParameterType &c,
+                          double sigma,
                           int k, int l, int m, 
-                          PathType &out );        
+                          PathType &out );    
 
         double log_transition(ParameterType &c_star, ParameterType &c);
         double log_prior(ParameterType &c);
         double log_path_likelihood( PathType &x, 
                                     ParameterType &c, 
+                                    double sigma,
                                     CoarsePathType &y,
                                     int k, int l, int m );
 
-        static ParameterType default_parameters( Options<OUDynamics>& o )
+        static ParameterType default_parameters( Options& o )
         {
             ParameterType real_c(1);
             real_c(0) = 1.70;
@@ -73,16 +70,7 @@ class OUDynamics : public DynamicsBase
 
 
     protected:
-        Options<OUDynamics> opts;
-
-        double _d_sigma;
-        double _dt;
-        double _d_variance; 
-        double _d_const;
-        double _o_variance;
-        double _o_const;
-        
-        int _parameter_dimension;
+        Options opts;
 
 }; // end of class OUDynamics
 

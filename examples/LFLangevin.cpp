@@ -24,7 +24,7 @@ using namespace MCMC;
 
 int main( int argc, char *argv[] )
 {
-    Options<LangevinDynamics> opts( argc, argv );
+    Options opts( argc, argv );
 
     gsl_rng *r;
     gsl_rng_env_setup();

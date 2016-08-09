@@ -10,7 +10,6 @@ double OUDynamics::sample_transition_density(gsl_rng *r, double c )
     return gsl_ran_gaussian(r, variance ) + c;
 }
 
-
 double OUDynamics::log_transition(ParameterType &c_star, ParameterType &c)
 {
     // Symmetric
@@ -26,11 +25,13 @@ double OUDynamics::log_prior(ParameterType &c)
 
 double OUDynamics::log_path_likelihood( PathType &x, 
                                         ParameterType &c, 
+                                        double sigma,
                                         CoarsePathType &y,
                                         int k, int l, int m )
 {
     double log_total = 0;
-
+    double _d_const = 0.5/(sigma*sigma*_dt);
+    
     Vector2d xt;
     Vector2d xtminus1;
 
@@ -52,6 +53,7 @@ double OUDynamics::log_path_likelihood( PathType &x,
 
 void OUDynamics::forward_sim( gsl_rng *r, 
                               ParameterType &c,
+                              double sigma,
                               int k, int l, int m, 
                               PathType &out )
 {
@@ -59,6 +61,7 @@ void OUDynamics::forward_sim( gsl_rng *r,
 
     double random_noise_x;
     double random_noise_y;
+    double _d_variance = 0.5 / (sigma*sigma*_dt);
     
     random_noise_x = gsl_ran_gaussian(r, _d_variance );
     random_noise_y = gsl_ran_gaussian(r, _d_variance);  
