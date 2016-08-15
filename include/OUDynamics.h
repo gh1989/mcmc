@@ -29,38 +29,33 @@ class OUDynamics : public DynamicsBase
         typedef Tensor<ParameterPointType, 2> ParameterChainType;
 
         typedef Tensor<double, 3> CoarsePathType;
-        typedef Tensor<double, 4> PathType;    
+        typedef Tensor<double, 4> PathType;  
+        typedef Tensor<double, 1> SigmaChainType;        
         
-        OUDynamics(Options& o): opts(o), DynamicsBase(o)
-        {
-            _parameter_dimension = 1;
-        }
+        OUDynamics(Options& o): _opts(o), DynamicsBase(o)  {}
 
-        OUDynamics()
+        OUDynamics() = default;
+        OUDynamics& operator=(OUDynamics& other) = delete;
+        OUDynamics( OUDynamics&& ) = delete;
+        OUDynamics( OUDynamics& ) = delete;
+        OUDynamics& operator=(OUDynamics&& other)
         {
-            _parameter_dimension = 1;
+            _opts = other.opts();
         }
-
+        
+        
+        
         int parameter_dimension(){ return _parameter_dimension; }
         int parameter_dimension( const Options& o ){ return _parameter_dimension; }
 
-        void output_file_timeseries(ParameterChainType &ccc);
-        double sample_transition_density(gsl_rng *r, double c );
-
-        void forward_sim( gsl_rng *r, 
-                          ParameterType &c,
-                          double sigma,
-                          int k, int l, int m, 
-                          PathType &out );    
+        void output_file_timeseries(ParameterChainType &ccc, SigmaChainType &sss);
+        void forward_sim( gsl_rng *r, ParameterType &c, double log_sigma, int k, int l, int m, PathType &out );    
 
         double log_transition(ParameterType &c_star, ParameterType &c);
         double log_prior(ParameterType &c);
-        double log_path_likelihood( PathType &x, 
-                                    ParameterType &c, 
-                                    double sigma,
-                                    CoarsePathType &y,
-                                    int k, int l, int m );
-
+        double log_path_likelihood( PathType &x, ParameterType &c, double log_sigma, CoarsePathType &y, int k, int l, int m );
+        double sample_transition_density(gsl_rng *r, double c );
+        
         static ParameterType default_parameters( Options& o )
         {
             ParameterType real_c(1);
@@ -70,8 +65,9 @@ class OUDynamics : public DynamicsBase
 
 
     protected:
-        Options opts;
-
+        Options _opts;
+        constexpr static double _parameter_dimension = 1;
+        
 }; // end of class OUDynamics
 
 }

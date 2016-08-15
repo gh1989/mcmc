@@ -15,51 +15,64 @@ using namespace Eigen;
 #include <gsl/gsl_rng.h>
 #include <gsl/gsl_randist.h>
 
+#include "Dynamics.h"
 #include "FourierSeries.h"
 #include "Options.h"
-#include "Parameters.h"
-#include "Dynamics.h"
-
 using namespace MCMC;
 
 namespace MCMC
 {
 
-class LangevinDynamics  : public DynamicsBase {
+class LangevinDynamics : public DynamicsBase {
     public:
     
         typedef ComplexType ParameterPointType;    
         typedef Tensor<ParameterPointType, 1> ParameterType;
         typedef Tensor<ParameterPointType, 2> ParameterChainType;
-
         typedef Tensor<double, 3> CoarsePathType;
         typedef Tensor<double, 4> PathType;    
+        typedef Tensor<double, 1> SigmaChainType;
         
-        LangevinDynamics(Options &o): opts(o), DynamicsBase(o)
+        LangevinDynamics(Options &o): _opts(o), DynamicsBase(o)
         {
-             _cutoff = opts.cutoff();
+             std::cout<< this << "LangevinDynamics(Options &o)" << std::endl;
+             _opts.print_options(std::cout);
+             _cutoff = _opts.cutoff();
              _parameter_dimension = 2*_cutoff*(_cutoff+1);
         }
 
-        LangevinDynamics() : DynamicsBase() {}
-
+        LangevinDynamics() = default;
+        LangevinDynamics(LangevinDynamics&) = delete;
+        LangevinDynamics& operator=(const LangevinDynamics& other)
+        {
+            _opts = other.opts();
+            _cutoff = _opts.cutoff();
+            _parameter_dimension = 2*_cutoff*(_cutoff+1);
+        }
+        
+        LangevinDynamics(const LangevinDynamics&&) = delete;
+        LangevinDynamics& operator=(const LangevinDynamics&& other)
+        {
+            _opts = other.opts();
+            _cutoff = _opts.cutoff();
+            _parameter_dimension = 2*_cutoff*(_cutoff+1);
+        }
+        
+        ~LangevinDynamics(){ std::cout<<"LangevinDynamics... Destructing."<<std::endl;}
+        
         int parameter_dimension(){ return _parameter_dimension; }
         int parameter_dimension( const Options& o )
         {
-            _cutoff = opts.cutoff();
+            _cutoff = _opts.cutoff();
             return 2*_cutoff*(_cutoff+1);
         }
 
-        void output_file_timeseries(ParameterChainType &ccc);
+        void output_file_timeseries(ParameterChainType &ccc, SigmaChainType &sss);
         ComplexType sample_transition_density(gsl_rng *r, ComplexType c );
         void forward_sim( gsl_rng *r, ParameterType &c, double sigma, int k, int l, int m, PathType &out );
         double log_prior(ParameterType &c);
         double log_transition(ParameterType &c_star, ParameterType &c);
-        double log_path_likelihood( PathType &x, 
-                                    ParameterType &c, 
-                                    double sigma,
-                                    CoarsePathType &y,
-                                    int k, int l, int m );
+        double log_path_likelihood( PathType &x, ParameterType &c, double sigma, CoarsePathType &y, int k, int l, int m );
 
         static ParameterType default_parameters( Options& o )
         {
@@ -75,8 +88,9 @@ class LangevinDynamics  : public DynamicsBase {
         
     
     protected:
-        Options opts;
+        Options _opts;
         int _cutoff;
+        int _parameter_dimension;
 
 
 }; // end of class LangevinDynamics

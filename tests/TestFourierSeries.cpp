@@ -2,12 +2,15 @@
 #include "lest/lest.hpp"
 
 using namespace MCMC;
+using lest::approx;
 
 const lest::test specification[] =
 {
 
     CASE( "FourierSeries_operator")
     {
+        approx eps = approx::custom().epsilon( 1e-100 );
+        
         FourierSeries f(1);
         FourierSeries f_new(1);
         f.set_mode(1,1,0.25);
@@ -20,33 +23,56 @@ const lest::test specification[] =
     },
 
     CASE( "FourierSeries_set_mode")
-    {
-    
-        Tensor<ComplexType, 1> c(4);
+    {               
         int cutoff = 1;
         FourierSeries f(cutoff);
-        int idx;
-        int ii;
-        int jj; 
         
-        for( size_t i=1; i<cutoff+1; ++i )
-            f.set_mode( i, 0, c(i-1) );
+        f.set_mode(0, 1, 1.0);
+        EXPECT(f.get_mode(0,1) == 1.0 );
+        Tensor<ComplexType, 1> c(4);
+        for(size_t i=0; i<4; ++i) 
+            c(i) = i;
+        std::cout << "Parameters";
+        std::cout << c << std::endl;
+        f.set_modes(c);                   
+                   
+        EXPECT( f.get_mode(  0, 0 ) == 0.0 );
+        EXPECT( f.get_mode(  1, 0 ) == 0.0 );
+        EXPECT( f.get_mode(  -1, 1 ) == 1.0 );
+        EXPECT( f.get_mode(  0, 1 ) == 2.0 );
+        EXPECT( f.get_mode(  1, 1 ) == 3.0 );
 
-        for( size_t i=-cutoff; i<cutoff+1; ++i )
-            for( size_t j=1; j<cutoff+1; ++j )
-            {
-                ii  = cutoff + i; 
-                jj  = cutoff + j;
-                idx = ii + jj*(2*cutoff+1);
-                f.set_mode( i, j, c( idx ) );
-            }
-
-        EXPECT( f.get_mode(  0, 0 ) == 0.0  );
-        EXPECT( f.get_mode(  1, 0 ) == c(0) );
-        EXPECT( f.get_mode( -1, 1 ) == c(1) );
-        EXPECT( f.get_mode(  0, 1 ) == c(2) );
-        EXPECT( f.get_mode(  1, 1 ) == c(3) );
+        f.set_mode( 1,1, ComplexType(0,1) );
+        EXPECT( f.get_mode(-1,-1) == ComplexType(0,-1) );
+        
     },
+    
+    CASE("FourierSeries_grad")
+    {
+        Vector2d grad_result;
+        
+        int cutoff = 1;
+        FourierSeries f(cutoff);
+        
+        f.set_mode(0, 1, 1.0);
+        EXPECT(f.get_mode(0,1) == 1.0 );
+        Tensor<ComplexType, 1> c(4);
+        for(size_t i=0; i<3; ++i) 
+            c(i) = 0;
+        c(3) = ComplexType(0.5, -0.5);
+        f.set_modes(c);                 
+        grad_result = f.grad( 0.5454, 0.8);
+        
+        std::cout<< grad_result;
+        
+        EXPECT( -8.73253 == approx(grad_result(0)) );
+        EXPECT( -8.73253 == approx(grad_result(1)) );
+        
+        Vector2d x(0.5454, 0.8);
+        
+        EXPECT( f.grad(x) == grad_result );
+        
+        }
 
 };
 

@@ -9,6 +9,7 @@ using namespace MCMC;
 
 int main( int argc, char *argv[] )
 {
+    /*
     Options opts( argc, argv );
     gsl_rng *r;
     gsl_rng_env_setup();
@@ -16,4 +17,5 @@ int main( int argc, char *argv[] )
     gsl_rng_set( r, opts.rng_seed() );
     Algorithm<SequentialLFMCMC, LangevinDynamics> algo( opts );
     algo.run(r);   
+    */
 }

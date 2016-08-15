@@ -2,13 +2,43 @@
 
 using namespace MCMC;
 
+void Options::default_values()
+{
+    _path_length            = 16;
+    _mcmc_trials            = 10000;
+    _burn                   = 0;
+    _extra_data_ratio       = 1;
+    _parallel_paths         = 25;
+    _rng_seed               = 0;
+    _cutoff                 = 1;
+
+    _parameter_proposal_sigma     = 0.05;
+    _observation_noise_sigma      = 0.1;
+    _trajectory_path_delta        = 0.001;
+    _log_real_sigma               = log( 0.001 );
+    _log_start_sigma              = 0.0; 
+    _parameter_proposal_diffusion_sigma = 0.1;
+    
+    _infer_drift_parameters     = true;
+    _infer_diffusion_parameters = true;
+}
+
+Options::Options()
+{
+    //std::cout<< this << " - Options constructor called with no arguments. Default values being set." << std::endl;
+    default_values();
+}
+
 Options::Options( int argc, char *argv[] )
 {
+    //std::cout<< this << " - Options constructor called cmd line arguments." << std::endl;
     // The option.
     int opt;
     
+    default_values();
+
     // Get options from command line.
-    while( ( opt = getopt( argc, argv, ":R:K:P:N:B:M:c:o:p:d:z:" ) ) != EOF ) 
+    while( ( opt = getopt( argc, argv, ":R:K:P:N:B:M:c:o:p:g:l:d:D:i:" ) ) != EOF ) 
     {
     switch (opt)
         {
@@ -43,13 +73,13 @@ Options::Options( int argc, char *argv[] )
             break;
 
             case 'c':
-            _parameter_proposal_variance = atof(optarg);
-            std::cout << "set _parameter_proposal_variance = " << _parameter_proposal_variance << std::endl;
+            _parameter_proposal_sigma = atof(optarg);
+            std::cout << "set _parameter_proposal_sigma = " << _parameter_proposal_sigma << std::endl;
             break;
             
             case 'o':
-            _observation_noise_variance = atof(optarg);
-            std::cout << "set _observation_noise_variance = " << _observation_noise_variance << std::endl;
+            _observation_noise_sigma = atof(optarg);
+            std::cout << "set _observation_noise_sigma = " << _observation_noise_sigma << std::endl;
             break;
             
             case 'p':
@@ -57,17 +87,53 @@ Options::Options( int argc, char *argv[] )
             std::cout << "set _trajectory_path_delta = " << _trajectory_path_delta << std::endl;
             break;
             
-            case 'd':
-            _variance_sigma = atof(optarg);
-            std::cout << "set _variance_sigma = " << _variance_sigma << std::endl;
+            case 'g':
+            _log_start_sigma = atof(optarg);
+            std::cout << "set _log_start_sigma = "<< _log_start_sigma << std::endl;
             break;
             
-            case 'z':
-            _zeta_sigma = atof(optarg);
-            std::cout<< "set _zeta_sigma = " << _zeta_sigma << std::endl;
+            case 'l':
+            _log_real_sigma = atof(optarg);
+            std::cout<< "set _log_real_sigma ="<< _log_real_sigma << std::endl;
             break;
-
+            
+            case 'd':
+            _parameter_proposal_diffusion_sigma = atof(optarg);
+            std::cout << "set _parameter_proposal_diffusion_sigma = " << _parameter_proposal_diffusion_sigma << std::endl;
+            break;
+            
+            case 'i':
+            _infer_diffusion_parameters = atoi(optarg); 
+            std::cout << "set _infer_diffusion_parameters = " << _infer_diffusion_parameters << std::endl;
+            break;
+            
+            case 'D':
+            _infer_drift_parameters = atoi(optarg);
+            std::cout << "set _infer_drift_parameters = " << _infer_drift_parameters << std::endl;
+            break;
+            
         }
     }
+}
 
+void Options::print_header( std::ofstream &file )
+{
+    file << "#_log_real_sigma: " << _log_real_sigma <<std::endl;
+    file << "#_observation_noise_sigma: " << _observation_noise_sigma <<std::endl;
+    file << "#_path_length: "  << _path_length <<std::endl;
+    file << "#_extra_data_ratio: " << _extra_data_ratio <<std::endl;
+    file << "#_parallel_paths: "<< _parallel_paths <<std::endl;
+    file << "#_parameter_proposal_sigma: " << _parameter_proposal_sigma <<std::endl;
+}
+
+void Options::print_options( std::ostream &o )
+{
+    o << "_output_subfolder = " << _output_subfolder <<std::endl;
+    o << "_log_real_sigma = " << _log_real_sigma <<std::endl;
+    o << "_observation_noise_sigma = " << _observation_noise_sigma <<std::endl;
+    o << "_path_length = "  << _path_length <<std::endl;
+    o << "_extra_data_ratio = " << _extra_data_ratio <<std::endl;
+    o << "_parallel_paths = "<< _parallel_paths <<std::endl;
+    o << "_parameter_proposal_sigma = " << _parameter_proposal_sigma <<std::endl;
+    o << "_mcmc_trials = " << _mcmc_trials <<std::endl;
 }

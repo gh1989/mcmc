@@ -1,9 +1,11 @@
 #ifndef SEQUENTIAL_LF_MCMC
 #define SEQUENTIAL_LF_MCMC
 
+/*
 #include "Dynamics.h"
 #include "MCMCBase.h"
 #include "Options.h"
+
 
 using namespace MCMC;
 
@@ -11,50 +13,11 @@ namespace MCMC
 {
 
 template<typename Dynamics_>
-class SequentialLFMCMC : public MCMCBase<Dynamics_>
+class SequentialLFMCMC
 {
 public:
-
-    typedef typename Dynamics_::ParameterType ParameterType;
-    typedef typename Dynamics_::ParameterChainType ParameterChainType;
-    typedef typename Dynamics_::PathType PathType;
-    typedef typename Dynamics_::CoarsePathType CoarsePathType;
-    typedef typename Dynamics_::ParameterPointType ParameterPointType;
     
-    typedef Tensor<double, 5> SMCTrajectorySamplesType;
-    typedef Tensor<ParameterPointType, 2> SMCParameterSamplesType;
-    typedef Tensor<double, 1> SMCSigmaSamplesType;
-    
-    using MCMCBase<Dynamics_>::opts;
-    using MCMCBase<Dynamics_>::dynamics;
-    
-    using MCMCBase<Dynamics_>::K;
-    using MCMCBase<Dynamics_>::M;
-    using MCMCBase<Dynamics_>::L;
-    using MCMCBase<Dynamics_>::N;
-    
-    using MCMCBase<Dynamics_>::observed;
-    using MCMCBase<Dynamics_>::real;
-    using MCMCBase<Dynamics_>::x;
-    using MCMCBase<Dynamics_>::x_star;
-    
-    using MCMCBase<Dynamics_>::c_dim;
-    using MCMCBase<Dynamics_>::c;
-    using MCMCBase<Dynamics_>::c_star;
-    using MCMCBase<Dynamics_>::real_c;
-    using MCMCBase<Dynamics_>::parameter_chain;
-    
-    using MCMCBase<Dynamics_>::real_sigma;
-    using MCMCBase<Dynamics_>::zeta_sigma;
-    using MCMCBase<Dynamics_>::sigma_star;
-    using MCMCBase<Dynamics_>::sigma;
-    using MCMCBase<Dynamics_>::variance_sigma;
-    using MCMCBase<Dynamics_>::sigma_chain;   
-    
-    using MCMCBase<Dynamics_>::setup_observed_starts;
-    using MCMCBase<Dynamics_>::trajectory;
-    
-    SequentialLFMCMC(Options& o) : MCMCBase<Dynamics_>(o)
+    SequentialLFMCMC(Options& o) : (o)
     {
         // Samples from the SMC bridging distributions
         smc_trials = 100;
@@ -233,5 +196,5 @@ double SequentialLFMCMC<Dynamics_>::log_path_likelihood(  PathType &x,
 }
 
 }
-
+*/
 #endif

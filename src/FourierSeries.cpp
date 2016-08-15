@@ -12,15 +12,7 @@ FourierSeries::FourierSeries( int M_ ) : M(M_), total_modes( (2*M_+1)*(2*M_+1) )
         for(size_t j=0; j<2*M+1; ++j)
             modes(i,j) = ComplexType(0,0);
 }
-
-FourierSeries::FourierSeries()
-{
-}
-
-FourierSeries::~FourierSeries()
-{
-}
-        
+     
 void FourierSeries::set_mode( int i, int j, ComplexType mode)
 {
     int ii = M + i;

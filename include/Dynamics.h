@@ -12,23 +12,20 @@ namespace MCMC
 class DynamicsBase
 {
 public:
-    DynamicsBase(Options &o)
-    {
-        _dt = opts.trajectory_path_delta();
-        _o_variance = opts.observation_noise_variance();
-        _o_const = (0.5 / _o_variance);
-    }
+    DynamicsBase(Options &o) : _opts(o) {}
     DynamicsBase(){}
     ~DynamicsBase(){}
     
+    virtual double log_prior_sigma(double log_sigma);
+    virtual double log_transition_sigma(double log_sigma_star, double log_sigma);
+    
+    const Options &opts() const {return _opts;}
+    
 protected:
-    double _dt;
-    double _o_variance;
-    double _o_const;
-    Options opts;
+    Options _opts;
     int _parameter_dimension;
 };
 
-
 }
+
 #endif // DYNAMICS_H

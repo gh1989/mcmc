@@ -23,8 +23,12 @@ class FourierSeries
 {
 public:
     FourierSeries(int M_);
-    FourierSeries();
-    ~FourierSeries();
+    FourierSeries() = default;
+    FourierSeries(FourierSeries&&) = default;
+    FourierSeries& operator=(FourierSeries&&) = default;
+    FourierSeries(FourierSeries&) = default;
+    FourierSeries& operator=(FourierSeries&) = default;
+    ~FourierSeries() = default;
 
     Vector2d grad( Vector2d );
     Vector2d grad( double x, double y );

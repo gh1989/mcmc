@@ -5,6 +5,7 @@
     #define M_PI 3.14159265359
 #endif
 
+#include <iostream>
 #include <Eigen/Dense>
 #include <Eigen/CXX11/Tensor>
 
@@ -25,11 +26,31 @@ template <template <class A> class AlgoType, class Dynamics>
 class Algorithm
 {
     public:
-        Algorithm( Options& o ) : _opts(o)
+    
+        using algo_type = AlgoType<Dynamics>;
+    
+        Algorithm( Options& o ) : _opts(o), algo_scheme(o) 
         {
-            algo_scheme = AlgoType<Dynamics>(o);
+            _opts.print_options(std::cout);
         }
-        ~Algorithm(){};
+        
+        Algorithm(Algorithm&&)=default;
+        
+        template< template <class X> class U, class V >
+        Algorithm& operator=(Algorithm<U, V>&& arg)
+        {
+        };      
+        
+        Algorithm(Algorithm&)=default;       
+        
+        template< template <class X> class U, class V >
+        Algorithm& operator=(Algorithm<U, V>& arg)
+        {
+            swap(arg);
+            return *this;
+        };     
+        
+        ~Algorithm() = default;
         void run( gsl_rng *r );
 
         Options opts(){ return _opts; }
@@ -60,20 +81,25 @@ void Algorithm<AlgoType, Dynamics>::run( gsl_rng *r )
         algo_scheme.propose(r);
         
         log_u = log( gsl_rng_uniform(r) );
+        
         log_a = algo_scheme.log_acceptance_probability();   
 
 
         if( log_u < log_a )
         {
            acceptance_rate += 1.0;         
-           std::cout<<"Accept ("<<double(acceptance_rate)/double(n+1)<<")"<<std::endl;          
+           std::cout<< std::endl << "Accept ("<<double(acceptance_rate)/double(n+1)<<")";             
            algo_scheme.accept();
+        }
+        else
+        {
+            std::cout<<".";           
         }
         algo_scheme.store_chain(n);
         
     }
 
-    std::cout<< "Accepted: " << double(acceptance_rate)/double(N) << std::endl;
+    std::cout<< std::endl << "Accepted: " << double(acceptance_rate)/double(N) << std::endl;  
     algo_scheme.finish();
 }
 
