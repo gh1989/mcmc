@@ -14,14 +14,25 @@ class Options
 {
 
     public:
+    
+        // Called with options.
         Options( int argc, char *argv[] );
         
+        // Default options.
         Options();
+        
+        /*
         Options(Options&&)=default;
-        Options& operator=(Options&&)=default;       
-        Options(const Options&)=default;       
-        Options& operator=(const Options&)=default;       
+        Options& operator=(Options&&)=default;
+        Options(const Options&)=default;
+        Options& operator=(const Options&)=default;   
         ~Options(){std::cout<<"Options Desctructing"<<std::endl;};
+        */
+        
+        ~Options()
+        {
+            std::cout<<"~Options() called from "<< this << std::endl;
+        }
         
         bool infer_diffusion_parameters() { return _infer_diffusion_parameters; }
         bool infer_drift_parameters() { return _infer_drift_parameters; }
@@ -34,6 +45,7 @@ class Options
         int parallel_paths() const { return _parallel_paths; }
         int burn() const { return _burn; }
         int cutoff() const { return _cutoff; }
+        int number_particles() const {return _number_particles;}
         
         double log_real_sigma() const {return _log_real_sigma;}
         double log_start_sigma() const {return _log_start_sigma;}
@@ -44,6 +56,7 @@ class Options
         
         std::string output_subfolder() { return _output_subfolder; }
         
+        void set_number_particles( int n){ _number_particles = n; }
         void set_mcmc_trials( int n ){ _mcmc_trials = n; }
         void set_extra_data_ratio( int n ){ _extra_data_ratio = n; }
         void set_path_length( int n ){ _path_length = n; }
@@ -75,7 +88,8 @@ class Options
         int _parallel_paths;
         int _rng_seed;
         int _cutoff;
-
+        int _number_particles;
+        
         double _parameter_proposal_sigma;
         double _observation_noise_sigma;
         double _trajectory_path_delta;

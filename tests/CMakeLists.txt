@@ -20,3 +20,7 @@ target_link_libraries(TestLangevin LangevinDynamics gsl gslcblas Options)
 
 add_executable(TestRandom TestRandom.cpp)
 target_link_libraries(TestRandom gsl gslcblas)
+
+add_executable(TestVector TestVector.cpp)
+target_link_libraries(TestVector LangevinDynamics gsl gslcblas Options)
+

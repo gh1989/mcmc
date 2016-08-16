@@ -1,8 +1,13 @@
 #include "LangevinDynamics.h"
+
+#define DEBUG
 #include "Options.h"
+
 #include "lest/lest.hpp"
 #include <gsl/gsl_rng.h>
 #include <gsl/gsl_randist.h>
+
+
 
 using namespace std;
 using namespace MCMC;

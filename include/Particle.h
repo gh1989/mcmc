@@ -16,21 +16,20 @@ public:
     using PathType              = typename Dynamics_::PathType;
     using CoarsePathType        = typename Dynamics_::CoarsePathType;
 
-   Particle(Options& o)
+   Particle(Options& o) : _dynamics(o)
     {
         K = o.parallel_paths();
         L = o.path_length();
         M = o.extra_data_ratio();
         x = PathType( K, L, M, 2 ); 
-        _dynamics = Dynamics_(o);
     }
     
+    // Do not instantiate without options.
     Particle() = delete;
     
-    Particle( const Particle<Dynamics_>& other )
+    Particle( const Particle<Dynamics_>& other ) : _dynamics(other.dynamics())
     {
         x = other.path();
-        _dynamics = other.dynamics();
         K = other.parallel_paths();
         L = other.path_length();
         M = other.extra_data_ratio();
@@ -38,16 +37,37 @@ public:
     
     Particle<Dynamics_>& operator=(const Particle<Dynamics_>& other)
     {
-        x = other.path();
         _dynamics = other.dynamics();
+        x = other.path();
+        K = other.parallel_paths();
+        L = other.path_length();
+        M = other.extra_data_ratio();
+        return *this;
+    }
+    
+    Particle(const Particle<Dynamics_>&& other) : _dynamics(other.dynamics())
+    {
+        x = other.path();
         K = other.parallel_paths();
         L = other.path_length();
         M = other.extra_data_ratio();
     }
     
-    ~Particle(){std::cout<<"Particle Destructing"<<std::endl;}
+    Particle<Dynamics_>& operator=(const Particle<Dynamics_>&& other)
+    {
+        _dynamics = other.dynamics();
+        x = other.path();
+        K = other.parallel_paths();
+        L = other.path_length();
+        M = other.extra_data_ratio();
+        return *this;
+    }
     
-    const Options& opts() const {return _opts;}
+    ~Particle()
+    {
+        std::cout<<"~Particle() called from "<< this << std::endl;
+    }
+    
     
     double unnormal_weight( size_t t, ParameterType &c, double sigma, CoarsePathType &y);
     void setup_starts(gsl_rng *r, CoarsePathType &y);
@@ -61,14 +81,13 @@ public:
     const size_t extra_data_ratio() const { return M; }
     
 private:  
-
+    
     size_t K;
     size_t L;
     size_t M;
     
     PathType x;
 
-    Options _opts;
     Dynamics_ _dynamics;
 };
 
@@ -76,18 +95,14 @@ template<class Dynamics_>
 double Particle<Dynamics_>::unnormal_weight(size_t t, ParameterType &c, double sigma, CoarsePathType &y)
 {   
     double log_total = 0;
+    
     for( size_t k=0; k<K; ++k )
         for( size_t l=0; l<t; ++l )
         {
             log_total += _dynamics.log_path_likelihood( x, c, sigma, y, k, l, 0 );
-            if( l < t-1 )
-            {
-                for( size_t m=1; m<M; ++m )
-                    log_total += _dynamics.log_path_likelihood( x, c, sigma, y, k, l, m );
-            }
         }
     
-    std::cout << "Returning log weight" << log_total << std::endl;
+    //std::cout << "Particle<Dynamics_>::unnormal_weight: log_total = " << log_total << std::endl;
     return log_total;
 }
 
@@ -97,8 +112,8 @@ void Particle<Dynamics_>::setup_starts(gsl_rng *r, CoarsePathType &y)
     std::cout<< "Setting up starts." << std::endl;
     for( size_t k=0; k<K; ++k )
     {
-        x(k, 0, 0, 0 ) = y(k, 0, 0); // + gsl_ran_gaussian(r, sigma);
-        x(k, 0, 0, 1 ) = y(k, 0, 1); // + gsl_ran_gaussian(r, sigma);
+        x(k, 0, 0, 0 ) = y(k, 0, 0);
+        x(k, 0, 0, 1 ) = y(k, 0, 1);
     }
 }
 
@@ -109,15 +124,15 @@ void Particle<Dynamics_>::forward_sim(gsl_rng *r, ParameterType &c, double sigma
     Forward simulate from (t,t+1]
     */
     
-    std::cout<< "forward_sim to " << t << std::endl;
+    //std::cout<< "Particle<Dynamics_>::forward_sim t=" << t << std::endl;
     
     for( size_t k=0; k<K; ++k )
     {
         for( size_t m=1; m<M; ++m )
         {
-            _dynamics.forward_sim(r, c, sigma, k, t, m, x);   
+            _dynamics.forward_sim(r, c, sigma, k, t-1, m, x);   
         }
-        _dynamics.forward_sim(r, c, sigma, k, t+1, 0, x);
+        _dynamics.forward_sim(r, c, sigma, k, t, 0, x);
     }  
 }
 

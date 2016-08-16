@@ -24,43 +24,64 @@ namespace MCMC
 {
 
 class LangevinDynamics : public DynamicsBase {
-    public:
     
+    public:    
         typedef ComplexType ParameterPointType;    
         typedef Tensor<ParameterPointType, 1> ParameterType;
         typedef Tensor<ParameterPointType, 2> ParameterChainType;
+        
         typedef Tensor<double, 3> CoarsePathType;
         typedef Tensor<double, 4> PathType;    
         typedef Tensor<double, 1> SigmaChainType;
         
-        LangevinDynamics(Options &o): _opts(o), DynamicsBase(o)
+        LangevinDynamics(Options &o) : _opts(o), DynamicsBase(o)
         {
-             std::cout<< this << "LangevinDynamics(Options &o)" << std::endl;
-             _opts.print_options(std::cout);
+             std::cout<<  "LangevinDynamics(Options &o) called in " << this << std::endl;
              _cutoff = _opts.cutoff();
              _parameter_dimension = 2*_cutoff*(_cutoff+1);
         }
 
-        LangevinDynamics() = default;
-        LangevinDynamics(LangevinDynamics&) = delete;
+        // Do not instantiate without options.
+        LangevinDynamics() = delete;
+        
+        LangevinDynamics(const LangevinDynamics& other) : _opts(other.opts()), DynamicsBase(other.opts())
+        {
+            _cutoff = _opts.cutoff();
+            _parameter_dimension = 2*_cutoff*(_cutoff+1);
+        }
+         
+        LangevinDynamics(const LangevinDynamics&& other): _opts(other.opts()), DynamicsBase(other.opts())
+        {
+            _cutoff = _opts.cutoff();
+            _parameter_dimension = 2*_cutoff*(_cutoff+1);
+        }
+ 
         LangevinDynamics& operator=(const LangevinDynamics& other)
         {
             _opts = other.opts();
             _cutoff = _opts.cutoff();
             _parameter_dimension = 2*_cutoff*(_cutoff+1);
+            return *this;
         }
         
-        LangevinDynamics(const LangevinDynamics&&) = delete;
         LangevinDynamics& operator=(const LangevinDynamics&& other)
         {
             _opts = other.opts();
             _cutoff = _opts.cutoff();
             _parameter_dimension = 2*_cutoff*(_cutoff+1);
+            return *this;
         }
         
-        ~LangevinDynamics(){ std::cout<<"LangevinDynamics... Destructing."<<std::endl;}
+        ~LangevinDynamics()
+        { 
+            std::cout<<"~LangevinDynamics() called in "<< this << std::endl;
+        }
         
-        int parameter_dimension(){ return _parameter_dimension; }
+        int parameter_dimension()
+        {
+            return _parameter_dimension; 
+        }
+        
         int parameter_dimension( const Options& o )
         {
             _cutoff = _opts.cutoff();
@@ -82,7 +103,7 @@ class LangevinDynamics : public DynamicsBase {
             ParameterType real_c(D);
             for(size_t i=0; i<D; ++i)
                 real_c(i) = ComplexType(0, 0);
-            real_c(D-1) = ComplexType(0.5, -0.5);
+            //real_c(D-1) = ComplexType(0.5, -0.5);
             return real_c;
         }
         

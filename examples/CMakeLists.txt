@@ -21,3 +21,6 @@ target_link_libraries( LFLangevin gsl gslcblas LikelihoodFreeMCMC Options Langev
 
 add_executable(PMCMC ParticleMCMC.cpp)
 target_link_libraries( PMCMC gsl gslcblas Options LangevinDynamics FourierSeries)
+
+add_executable(SMC SMC.cpp)
+target_link_libraries( SMC gsl gslcblas Options LangevinDynamics FourierSeries)

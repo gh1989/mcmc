@@ -50,7 +50,7 @@ class Algorithm
             return *this;
         };     
         
-        ~Algorithm() = default;
+        ~Algorithm() {};
         void run( gsl_rng *r );
 
         Options opts(){ return _opts; }

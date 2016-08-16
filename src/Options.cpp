@@ -21,24 +21,24 @@ void Options::default_values()
     
     _infer_drift_parameters     = true;
     _infer_diffusion_parameters = true;
+    _number_particles           = 100;
 }
 
 Options::Options()
 {
-    //std::cout<< this << " - Options constructor called with no arguments. Default values being set." << std::endl;
     default_values();
 }
 
+
 Options::Options( int argc, char *argv[] )
 {
-    //std::cout<< this << " - Options constructor called cmd line arguments." << std::endl;
     // The option.
     int opt;
     
     default_values();
 
     // Get options from command line.
-    while( ( opt = getopt( argc, argv, ":R:K:P:N:B:M:c:o:p:g:l:d:D:i:" ) ) != EOF ) 
+    while( ( opt = getopt( argc, argv, ":R:K:P:N:B:M:c:o:p:g:l:d:D:i:Q:" ) ) != EOF ) 
     {
     switch (opt)
         {
@@ -110,6 +110,11 @@ Options::Options( int argc, char *argv[] )
             case 'D':
             _infer_drift_parameters = atoi(optarg);
             std::cout << "set _infer_drift_parameters = " << _infer_drift_parameters << std::endl;
+            break;
+            
+            case 'Q':
+            _number_particles = atoi(optarg);
+            std::cout << "set _number_particles = " << _number_particles << std::endl;
             break;
             
         }
