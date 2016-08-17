@@ -7,7 +7,7 @@
 #include "LangevinDynamics.h"
 
 /* No diffusion constant inference:
-./bin/LFLangevin -K 25 -N 10000 -o 0.0002 -p 0.01 -c 0.001 -l -6.8
+./bin/SMC -Q 1000 -K 10 -M 10 -P 4 -o 0.01 -p 0.001 -R 1234 -i 0 -D 1
 */
 
 using namespace MCMC;
@@ -29,6 +29,7 @@ int main( int argc, char *argv[] )
     pmcmc.generate_true_trajectory(r);
     std::cout<< "True trajectory generated..." << std::endl;
     
+    pmcmc.propose(r);
     double log_marginal = pmcmc.smc(r);
     std::cout<< "Ran SMC algo." << std::endl;
     std::cout<< "Log marginal: " << log_marginal << std::endl;

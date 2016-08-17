@@ -87,8 +87,8 @@ void LangevinDynamics::forward_sim( gsl_rng *r, ParameterType &c, double log_sig
 
     gradtminus1 = V.grad( xtminus1 );
  
-    out(k, l, m, 0 ) = xtminus1(0)-gradtminus1(0)*dt + root_2dt*gsl_ran_gaussian(r, exp( log_sigma ) );
-    out(k, l, m, 1 ) = xtminus1(1)-gradtminus1(1)*dt + root_2dt*gsl_ran_gaussian(r, exp( log_sigma ) );  
+    out(k, l, m, 0 ) = xtminus1(0)-gradtminus1(0)*dt + root_2dt*gsl_ran_gaussian(r, exp( log_sigma ));
+    out(k, l, m, 1 ) = xtminus1(1)-gradtminus1(1)*dt + root_2dt*gsl_ran_gaussian(r, exp( log_sigma ));  
 }
 
 void LangevinDynamics::output_file_timeseries(ParameterChainType &ccc, SigmaChainType &sss)

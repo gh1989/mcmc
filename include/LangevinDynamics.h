@@ -74,7 +74,7 @@ class LangevinDynamics : public DynamicsBase {
         
         ~LangevinDynamics()
         { 
-            std::cout<<"~LangevinDynamics() called in "<< this << std::endl;
+            //std::cout<<"~LangevinDynamics() called in "<< this << std::endl;
         }
         
         int parameter_dimension()

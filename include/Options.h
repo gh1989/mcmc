@@ -31,7 +31,7 @@ class Options
         
         ~Options()
         {
-            std::cout<<"~Options() called from "<< this << std::endl;
+            //std::cout<<"~Options() called from "<< this << std::endl;
         }
         
         bool infer_diffusion_parameters() { return _infer_diffusion_parameters; }

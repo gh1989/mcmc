@@ -65,7 +65,7 @@ public:
     
     ~Particle()
     {
-        std::cout<<"~Particle() called from "<< this << std::endl;
+        //std::cout<<"~Particle() called from "<< this << std::endl;
     }
     
     
@@ -107,7 +107,8 @@ double Particle<Dynamics_>::unnormal_weight(size_t t, ParameterType &c, double s
 template<class Dynamics_>
 void Particle<Dynamics_>::setup_starts(gsl_rng *r, CoarsePathType &y)
 {
-    std::cout<< "Setting up starts." << std::endl;
+    //std::cout<< "Setting up starts." << std::endl;
+
     for( size_t k=0; k<K; ++k )
     {
         x(k, 0, 0, 0 ) = y(k, 0, 0);

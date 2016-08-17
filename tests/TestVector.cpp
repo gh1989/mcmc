@@ -162,6 +162,21 @@ int main( int argc, char *argv[] )
     
     LangevinDynamics::PathType path;
 
+    total = 0;
+    for(size_t i=0; i<num_particles; ++i) 
+        total += exp( W(0, i) ); 
+    for( size_t i=0; i<num_particles; ++i )
+        p[i] = exp( W(0, i) ) / total;
+
+    for(size_t t=1; t<L; ++t )
+    {
+        total = 0;
+        for(size_t i=0; i<num_particles; ++i) 
+            total += exp( W(t, i) ); 
+        for( size_t i=0; i<num_particles; ++i )
+            p[i] *= exp( W(t, i) ) / total;
+    }
+
     for(size_t l=0; l<L; ++l)
     {
         // Print for t=l

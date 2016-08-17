@@ -150,7 +150,6 @@ template<class Dynamics_>
 void ParticleMCMC<Dynamics_>::generate_observations(gsl_rng *r)
 {   
     double observation_sigma = _opts.observation_noise_sigma();
-    //std::cout << "ParticleMCMC thinks that observation_noise_sigma is: " << observation_sigma << std::endl;
     double random_noise_x;
     double random_noise_y;
 
@@ -287,7 +286,6 @@ double ParticleMCMC<Dynamics_>::smc(gsl_rng *r)
     
     for(size_t i=0; i<num_particles; ++i)  
         W(0, i) = -log(num_particles);
-        //W(0, i) = particles[i].unnormal_weight(0, c_star, log_sigma, observed);
         
     total = 0;
     for(size_t i=0; i<num_particles; ++i) 
@@ -296,15 +294,17 @@ double ParticleMCMC<Dynamics_>::smc(gsl_rng *r)
     phat(0) = (1.0/num_particles)*total;
     resample_with_replacement(r, 0);   
     
+    std::cout << "c_star" << c_star << std::endl;
+    std::cout << "log_sigma_star" << log_sigma_star << std::endl;
+
     for(size_t t=1; t<L; ++t)
     {
         // Generate particle samples.
         for(size_t i=0; i<num_particles; ++i)     
+        {
             particles[i]->forward_sim(r, c_star, log_sigma_star, t );
-        
-        // Assign weights.
-        for(size_t i=0; i<num_particles; ++i)
-            W(t, i) = particles[i]->unnormal_weight(t, c_star, log_sigma, observed);
+            W(t, i) = particles[i]->unnormal_weight(t, c_star, log_sigma_star, observed);
+        }
         
         // Calculate a part of the marginal.
         total = 0;
@@ -316,21 +316,7 @@ double ParticleMCMC<Dynamics_>::smc(gsl_rng *r)
         // Resample the particles based on weights.
         resample_with_replacement(r, t);
     }
-    /*
-    auto path = particles[0]->path();
-    
-    for( size_t k=0; k<K; ++k )
-        for( size_t l=0; l<L; ++l )
-        {
-             std::cout<< "Path at k="<<k<<"l="<<l<<"m="<<0<<" - "<<path(k,l,0,0)<<","<<path(k,l,0,1)<<std::endl;
-            if(l<L-1)
-            for( size_t m=1; m<M; ++m)
-            {
-                std::cout<< "Path at k="<<k<<"l="<<l<<"m="<<m<<" - "<<path(k,l,m,0)<<","<<path(k,l,m,1)<<std::endl;
-            }
-           
-        }
-    */
+
     // Return the marginal estimate.
     return log( phat(L-1) );
 }
@@ -338,7 +324,7 @@ double ParticleMCMC<Dynamics_>::smc(gsl_rng *r)
 template<class Dynamics_>
 void ParticleMCMC<Dynamics_>::resample_with_replacement(gsl_rng *r, size_t t)
 {    
-    resampled = particles;
+    resampled = std::move( particles ); // particles of size zero now.
     unsigned int resample_particle_index;
     double p[num_particles];
     for( size_t i=0; i<num_particles; ++i )
@@ -350,9 +336,8 @@ void ParticleMCMC<Dynamics_>::resample_with_replacement(gsl_rng *r, size_t t)
     for( size_t i=0; i<num_particles; ++i )
     {
         resample_particle_index = gsl_ran_discrete(r, g);
-        particles[i] = resampled[resample_particle_index];
+        particles.push_back( resampled[resample_particle_index] );
     }
-
 }
 
 template<class Dynamics_>
@@ -391,7 +376,7 @@ void ParticleMCMC<Dynamics_>::setup_from_options(Options &o)
         
         // The dimension of the b(X_t) parameters
         c_dim               = _dynamics.parameter_dimension(o);
-        
+
         // The current parameters for b(X_t)
         c                   = ParameterType(c_dim);
         // The proposed parameters for b(X_t)
