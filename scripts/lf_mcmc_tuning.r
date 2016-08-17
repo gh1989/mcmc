@@ -1,7 +1,6 @@
 library(zoo)
 par(mfrow=c(5,2) ,oma = c(0, 0, 2, 0) )
 par(mar=c(4,2,2,4))
-setwd("C:/cygwin64/home/Gregg/mcmc/output/")
 
 
 for(subfolder in list.dirs(full.names = FALSE))

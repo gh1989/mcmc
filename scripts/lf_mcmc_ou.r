@@ -20,6 +20,5 @@ mcmcSummary2d <- function( mcmc_data )
 }
 library(zoo)
 par(mar=c(4,2,2,4))
-setwd("~/mcmc/output")
 ou_mcmc_data = read.table("ou_mcmc_timeseries.txt")
 mcmcSummary2d(ou_mcmc_data)

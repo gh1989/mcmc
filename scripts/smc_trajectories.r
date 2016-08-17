@@ -1,5 +1,3 @@
-setwd("C:/cygwin64/home/Gregg/mcmc/output")
-
 library(reshape2)
 library(ggplot2)
 
