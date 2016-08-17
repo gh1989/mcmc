@@ -293,7 +293,7 @@ double ParticleMCMC<Dynamics_>::smc(gsl_rng *r)
     for(size_t i=0; i<num_particles; ++i) 
         total += exp( W(0, i) ); 
        
-    phat(0) = (1.0/N)*total;
+    phat(0) = (1.0/num_particles)*total;
     resample_with_replacement(r, 0);   
     
     for(size_t t=1; t<L; ++t)
@@ -311,7 +311,7 @@ double ParticleMCMC<Dynamics_>::smc(gsl_rng *r)
         for(size_t i=0; i<num_particles; ++i) 
             total += exp( W(t, i) );
         
-        phat(t) = phat(t-1) * (1.0/N)*total;
+        phat(t) = phat(t-1) * (1.0/num_particles)*total;
         
         // Resample the particles based on weights.
         resample_with_replacement(r, t);

@@ -40,9 +40,10 @@ int main( int argc, char *argv[] )
     Particle<LangevinDynamics>::CoarsePathType observed(K, L, 2);
     Particle<LangevinDynamics>::PathType real(K,L,M,2);
     
-    double log_sigma = -6;
-    size_t t = 1;
-       
+    double log_sigma = o.log_real_sigma();
+    
+    Tensor<double, 1> phat(L);
+    
     // Randomly dot around points in [-1,1]X[-1,1]
     for(size_t k=0; k<K; ++k)
     {
@@ -52,6 +53,7 @@ int main( int argc, char *argv[] )
     
     // Simulate them all forwards.
     for( size_t k=0; k<K; ++k )
+    {
         for( size_t l=0; l<L-1; ++l )
         {
         for( size_t m=1; m<M; ++m )
@@ -59,8 +61,9 @@ int main( int argc, char *argv[] )
             ld.forward_sim(r, c, log_sigma, k, l, m, real);   
         }
         ld.forward_sim(r, c, log_sigma, k, l+1, 0, real);
+        }
     }
-   
+    
     // Measure them with noise.
     double observation_sigma = o.observation_noise_sigma();
     double random_noise_x;
@@ -89,15 +92,33 @@ int main( int argc, char *argv[] )
     for(size_t i=0; i<num_particles; ++i)
     {
         particles[i]->setup_starts( r, observed );
-        //W(0, i) = -log(num_particles);
+        W(0, i) = -log(num_particles);
     }
 
     for(size_t i=0; i<num_particles; ++i) 
         total += exp( W(0, i) ); 
     
+    phat(0) = (1.0/num_particles)*total;
+    
     unsigned int resample_particle_index;
     double p[num_particles];
     
+    for(size_t i=0; i<num_particles; ++i) 
+        p[i] = exp( W(0, i) ) / total; 
+    
+    gsl_ran_discrete_t *g;
+    g = gsl_ran_discrete_preproc(num_particles, p);
+    
+    resampled = particles;
+    
+    for( size_t i=0; i<num_particles; ++i )
+    {
+        resample_particle_index = gsl_ran_discrete(r, g);
+        particles[i] = resampled[resample_particle_index];
+        std::cout << "Swapping particle " << i << " for particle " << resample_particle_index << std::endl;   
+        std::cout << p[i] <<" against "<< p[resample_particle_index] <<std::endl;
+    }
+
     for(size_t t=1; t<L; ++t)  
     {   
         for(size_t i=0; i<num_particles; ++i)
@@ -142,7 +163,13 @@ int main( int argc, char *argv[] )
                
             }
         */
+        std::cout<<"total:" << total << std::endl;
+        std::cout<<"(1.0/num_particles):" << (1.0/num_particles) << std::endl;
+        std::cout<<"phat(t-1)"<< "with t-1=" << t-1 << " = " << phat(t-1) << std::endl; 
+        phat(t) = phat(t-1) * (1.0/num_particles)*total;
     }
+    
+    std::cout<<"phat(L-1): "<< phat(L-1) << std::endl;
     
     std::string ts_file_name = "output/ts_smc.txt";
     std::ofstream ts_file;
@@ -152,6 +179,7 @@ int main( int argc, char *argv[] )
 
     for(size_t l=0; l<L; ++l)
     {
+        // Print for t=l
         for(size_t k=0; k<K; ++k)
             for(size_t i=0; i<num_particles; i++)
             {
@@ -161,6 +189,7 @@ int main( int argc, char *argv[] )
             
         ts_file << std::endl;
         
+        // Fill to t+1
         if(l<L-1)
         for(size_t m=0; m<M; ++m)
         {
@@ -177,7 +206,6 @@ int main( int argc, char *argv[] )
     
     ts_file_name = "output/ts_smc_observation.txt";
     ts_file.open(ts_file_name);
-    
     for(size_t l=0; l<L; ++l)
     {
         for(size_t k=0; k<K; ++k)
@@ -185,7 +213,15 @@ int main( int argc, char *argv[] )
         
         ts_file<<std::endl;
     }
+    ts_file.close();
     
+    ts_file_name = "output/ts_smc_probs.txt";
+    ts_file.open(ts_file_name);
+    for(size_t i=0;i<num_particles;++i)
+    {
+        ts_file << p[i] << "\t";
+    }
+    ts_file << std::endl;
     ts_file.close();
     
     particles.clear();

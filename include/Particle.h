@@ -97,11 +97,9 @@ double Particle<Dynamics_>::unnormal_weight(size_t t, ParameterType &c, double s
     double log_total = 0;
     
     for( size_t k=0; k<K; ++k )
-        for( size_t l=0; l<t; ++l )
-        {
-            log_total += _dynamics.log_path_likelihood( x, c, sigma, y, k, l, 0 );
-        }
-    
+    {
+        log_total += _dynamics.log_path_likelihood( x, c, sigma, y, k, t, 0 );
+    }
     //std::cout << "Particle<Dynamics_>::unnormal_weight: log_total = " << log_total << std::endl;
     return log_total;
 }
