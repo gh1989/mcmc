@@ -103,7 +103,7 @@ class LangevinDynamics : public DynamicsBase {
             ParameterType real_c(D);
             for(size_t i=0; i<D; ++i)
                 real_c(i) = ComplexType(0, 0);
-            //real_c(D-1) = ComplexType(0.5, -0.5);
+            real_c(D-1) = ComplexType(0.5, -0.5);
             return real_c;
         }
         

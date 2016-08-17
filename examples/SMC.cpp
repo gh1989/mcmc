@@ -29,9 +29,8 @@ int main( int argc, char *argv[] )
     pmcmc.generate_true_trajectory(r);
     std::cout<< "True trajectory generated..." << std::endl;
     
-    pmcmc.smc(r);
+    double log_marginal = pmcmc.smc(r);
     std::cout<< "Ran SMC algo." << std::endl;
-    
-    
-    
+    std::cout<< "Log marginal: " << log_marginal << std::endl;
+        
 }

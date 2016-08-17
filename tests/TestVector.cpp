@@ -148,28 +148,13 @@ int main( int argc, char *argv[] )
             std::cout << p[i] <<" against "<< p[resample_particle_index] <<std::endl;
         }
         
-        /* This is working
-        auto path = particles[i]->path();
-        
-        for( size_t k=0; k<K; ++k )
-            for( size_t l=0; l<L; ++l )
-            {
-                 std::cout<< "Path at k="<<k<<"l="<<l<<"m="<<0<<" - "<<path(k,l,0,0)<<","<<path(k,l,0,1)<<std::endl;
-                if(l<L-1)
-                for( size_t m=1; m<M; ++m)
-                {
-                    std::cout<< "Path at k="<<k<<"l="<<l<<"m="<<m<<" - "<<path(k,l,m,0)<<","<<path(k,l,m,1)<<std::endl;
-                }
-               
-            }
-        */
         std::cout<<"total:" << total << std::endl;
         std::cout<<"(1.0/num_particles):" << (1.0/num_particles) << std::endl;
         std::cout<<"phat(t-1)"<< "with t-1=" << t-1 << " = " << phat(t-1) << std::endl; 
         phat(t) = phat(t-1) * (1.0/num_particles)*total;
     }
     
-    std::cout<<"phat(L-1): "<< phat(L-1) << std::endl;
+    std::cout<<"log_marginal "<< log( phat(L-1) ) << std::endl;
     
     std::string ts_file_name = "output/ts_smc.txt";
     std::ofstream ts_file;

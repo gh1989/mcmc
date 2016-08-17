@@ -91,7 +91,7 @@ private:
     void setup_observed_starts( gsl_rng *r, CoarsePathType &y, PathType &out );
     void trajectory( gsl_rng *r, ParameterType &c, double sigma_, PathType &out );
     
-    constexpr static size_t num_particles = 1;
+    size_t num_particles;
 
     Options                 _opts;   
     Dynamics_               _dynamics;
@@ -423,11 +423,13 @@ void ParticleMCMC<Dynamics_>::setup_from_options(Options &o)
         log_sigma_chain         = SigmaChainType(N);    
         
         // SMC/Particle vars
+        num_particles = o.number_particles();
         W = Tensor<double, 2>(L, num_particles);
         for(size_t i=0; i<num_particles; ++i)
         {
             particles.push_back( std::make_shared<Particle<Dynamics_>>(o) );
         }
+                
     }
 
 #endif
