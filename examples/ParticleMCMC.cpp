@@ -8,6 +8,8 @@
 
 /* No diffusion constant inference:
 ./bin/LFLangevin -K 25 -N 10000 -o 0.0002 -p 0.01 -c 0.001 -l -6.8
+./bin/PMCMC -Q 10 -K 10 -p 0.0001 -M 4 -P 4 -o 0.001 -R 123 -i 0
+
 */
 
 using namespace MCMC;

@@ -256,18 +256,16 @@ double ParticleMCMC<Dynamics_>::log_acceptance_probability()
     // Sigma
     if( infer_diffusion_parameters )
     {
-        log_total += _dynamics.log_transition_sigma(log_sigma, log_sigma_star);
-        log_total -= _dynamics.log_transition_sigma(log_sigma_star, log_sigma);
         log_total += _dynamics.log_prior_sigma(log_sigma_star);
         log_total -= _dynamics.log_prior_sigma(log_sigma);
     }
     
-    // symmetric
-    // log_total += _dynamics.log_transition(c, c_star);       
-    // log_total -= _dynamics.log_transition(c_star, c);
-    log_total += _dynamics.log_prior(c_star);
-    log_total -= _dynamics.log_prior(c); 
-        
+    if( infer_drift_parameters )
+    {
+        log_total += _dynamics.log_prior(c_star);
+        log_total -= _dynamics.log_prior(c); 
+    }
+    
     log_total += log_marginal_likelihood_c_star;
     log_total -= log_marginal_likelihood_c;
     

@@ -16,6 +16,8 @@ int main( int argc, char *argv[] )
 {
     Options opts( argc, argv );
 
+    size_t N = opts.mcmc_trials();
+    
     gsl_rng *r;
     gsl_rng_env_setup();
     r = gsl_rng_alloc( gsl_rng_default );
@@ -30,8 +32,13 @@ int main( int argc, char *argv[] )
     std::cout<< "True trajectory generated..." << std::endl;
     
     pmcmc.propose(r);
-    double log_marginal = pmcmc.smc(r);
-    std::cout<< "Ran SMC algo." << std::endl;
-    std::cout<< "Log marginal: " << log_marginal << std::endl;
-        
+    double log_marginal;
+
+    for( size_t n=0; n<N; ++n )
+    {
+        pmcmc.propose(r);
+        log_marginal = pmcmc.smc(r);
+        std::cout<< "Ran SMC algo." << std::endl;
+        std::cout<< "Log marginal estimate: " << log_marginal << std::endl;
+    }    
 }
