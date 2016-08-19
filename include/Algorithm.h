@@ -79,23 +79,33 @@ void Algorithm<AlgoType, Dynamics>::run( gsl_rng *r )
     for(size_t n=0; n<N; ++n)
     {   
         algo_scheme.propose(r);
-        
         log_u = log( gsl_rng_uniform(r) );
-        
         log_a = algo_scheme.log_acceptance_probability();   
-
 
         if( log_u < log_a )
         {
            acceptance_rate += 1.0;         
-           std::cout<< std::endl << "Accept ("<<double(acceptance_rate)/double(n+1)<<")";             
+           std::cout<< n << "... Accept ("<<double(acceptance_rate)/double(n+1)<<")"<<std::endl;             
            algo_scheme.accept();
         }
         else
         {
-            std::cout<<".";           
+            std::cout<< n <<"... Reject"<<std::endl;           
         }
+        
         algo_scheme.store_chain(n);
+        
+        if (_opts.infer_drift_parameters())
+        {
+            std::cout << "c" << std::endl;
+            std::cout << algo_scheme.current_drift() << std::endl;
+        }
+        
+        if (_opts.infer_diffusion_parameters())
+        {
+            std::cout << "log_sigma" << std::endl;
+            std::cout << algo_scheme.current_log_sigma() << std::endl;
+        }
         
     }
 

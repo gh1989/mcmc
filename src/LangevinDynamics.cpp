@@ -1,6 +1,5 @@
 #include "LangevinDynamics.h"
 
-#include <chrono>
 #include <iostream>
 #include <fstream>
 #include <string>
@@ -91,35 +90,9 @@ void LangevinDynamics::forward_sim( gsl_rng *r, ParameterType &c, double log_sig
     out(k, l, m, 1 ) = xtminus1(1)-gradtminus1(1)*dt + root_2dt*gsl_ran_gaussian(r, exp( log_sigma ));  
 }
 
-void LangevinDynamics::output_file_timeseries(ParameterChainType &ccc, SigmaChainType &sss)
+void LangevinDynamics::output_file_timeseries(ParameterChainType &ccc, SigmaChainType &sss, std::ofstream &mcmc_file)
 {
-    cout<<"LangevinDynamics::output_file_timeseries"<<endl;
-    size_t N  = _opts.mcmc_trials();
-    
-    unsigned long milliseconds_since_epoch = 
-    std::chrono::duration_cast<std::chrono::milliseconds>
-        (std::chrono::system_clock::now().time_since_epoch()).count();
-        
-    std::string filename = "output/";
-    filename += _opts.output_subfolder();
-    std::cout << "Putting in subfolder:" << _opts.output_subfolder() << std::endl;
-    filename += "/LangevinTimeSeries_";
-    filename += std::to_string( milliseconds_since_epoch );
-    filename += ".txt";
-
-    std::cout<< "Output file: " << filename << std::endl;
-    
-    std::cout<< "Currently in " << this << "- LangevinDynamics::output_file_timeseries" << std::endl;
-    std::cout<< "Options are: " << std::endl;
-    _opts.print_options(std::cout);
-    
-    ofstream mcmc_file;
-    mcmc_file.open(filename);
-
     int defining_modes = parameter_dimension(_opts);
-
-    // experiment options
-    _opts.print_header( mcmc_file );
     
     // headers
     mcmc_file << "#";
@@ -128,7 +101,9 @@ void LangevinDynamics::output_file_timeseries(ParameterChainType &ccc, SigmaChai
     mcmc_file << "sigma" << std::endl;
     
     // data
-    for( size_t n=0; n<N; ++n )
+    size_t N = _opts.mcmc_trials();
+    size_t burn_in = _opts.burn();
+    for( size_t n=burn_in; n<N; ++n )
     {
         for( size_t m=0; m<defining_modes; ++m)
             mcmc_file << std::real(ccc(n,m)) << "\t" << std::imag(ccc(n,m)) << "\t";

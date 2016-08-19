@@ -1,6 +1,8 @@
 #ifndef LANGEVIN_DYNAMICS_H
 #define LANGEVIN_DYNAMICS_H
 
+#include <string>
+#include <fstream>
 #include <iostream>
 
 #ifndef M_PI
@@ -26,6 +28,7 @@ namespace MCMC
 class LangevinDynamics : public DynamicsBase {
     
     public:    
+    
         typedef ComplexType ParameterPointType;    
         typedef Tensor<ParameterPointType, 1> ParameterType;
         typedef Tensor<ParameterPointType, 2> ParameterChainType;
@@ -73,9 +76,7 @@ class LangevinDynamics : public DynamicsBase {
         }
         
         ~LangevinDynamics()
-        { 
-            //std::cout<<"~LangevinDynamics() called in "<< this << std::endl;
-        }
+        {}
         
         int parameter_dimension()
         {
@@ -88,7 +89,12 @@ class LangevinDynamics : public DynamicsBase {
             return 2*_cutoff*(_cutoff+1);
         }
 
-        void output_file_timeseries(ParameterChainType &ccc, SigmaChainType &sss);
+        static std::string dynamics_string()
+        {
+            return "Langevin_";
+        }
+        
+        void output_file_timeseries(ParameterChainType &ccc, SigmaChainType &sss, std::ofstream &mcmc_file);
         ComplexType sample_transition_density(gsl_rng *r, ComplexType c );
         void forward_sim( gsl_rng *r, ParameterType &c, double sigma, int k, int l, int m, PathType &out );
         double log_prior(ParameterType &c);
@@ -103,7 +109,9 @@ class LangevinDynamics : public DynamicsBase {
             ParameterType real_c(D);
             for(size_t i=0; i<D; ++i)
                 real_c(i) = ComplexType(0, 0);
-            real_c(D-1) = ComplexType(0.5, -0.5);
+            
+            if (o.infer_drift_parameters())
+                real_c(D-1) = ComplexType(0.5, -0.5);
             return real_c;
         }
         

@@ -1,6 +1,9 @@
 #ifndef PARTICLE_MCMC_H
 #define PARTICLE_MCMC_H
 
+#include <chrono>
+#include <fstream>
+#include <iostream>
 #include <memory>
 #include <vector>
 
@@ -80,6 +83,9 @@ public:
     void resample_with_replacement(gsl_rng *r, size_t t);
     void setup_from_options(Options &o);
     
+    ParameterType& current_drift(){ return c; }
+    double current_log_sigma() { return log_sigma; }
+    
     double smc(gsl_rng *r);    
     double log_acceptance_probability();
     
@@ -125,7 +131,9 @@ private:
     double log_marginal_likelihood_c;
     
     Tensor<double, 2> W;
-  
+     
+    std::ofstream mcmc_file; 
+    
     std::vector<std::shared_ptr<Particle<Dynamics_>>> particles;
     std::vector<std::shared_ptr<Particle<Dynamics_>>> resampled;
 };
@@ -143,8 +151,11 @@ void ParticleMCMC<Dynamics_>::accept()
 template<class Dynamics_>
 void ParticleMCMC<Dynamics_>::finish() 
 {
-    _dynamics.output_file_timeseries( parameter_chain, log_sigma_chain );
+    // experiment options
+    _opts.print_header( mcmc_file );
+    _dynamics.output_file_timeseries( parameter_chain, log_sigma_chain, mcmc_file );
 }
+
 
 template<class Dynamics_>
 void ParticleMCMC<Dynamics_>::generate_observations(gsl_rng *r)
@@ -283,7 +294,7 @@ double ParticleMCMC<Dynamics_>::smc(gsl_rng *r)
         particles[i]->setup_starts( r, observed );
     
     for(size_t i=0; i<num_particles; ++i)  
-        W(0, i) = -log(num_particles);
+        W(0, i) = particles[i]->unnormal_weight(0, c_star, log_sigma_star, observed);
         
     total = 0;
     for(size_t i=0; i<num_particles; ++i) 
@@ -412,7 +423,20 @@ void ParticleMCMC<Dynamics_>::setup_from_options(Options &o)
         {
             particles.push_back( std::make_shared<Particle<Dynamics_>>(o) );
         }
-                
+        
+        unsigned long int milliseconds_since_epoch = 
+        std::chrono::duration_cast<std::chrono::milliseconds>
+            (std::chrono::system_clock::now().time_since_epoch()).count();
+            
+        std::string filename = "output/";
+        filename += _opts.output_subfolder();
+        filename += "/pMCMCTimeSeries_";
+        filename += Dynamics_::dynamics_string();
+        filename += std::to_string( milliseconds_since_epoch );
+        filename += ".txt";
+        
+        mcmc_file.open(filename);
+      
     }
 
 #endif

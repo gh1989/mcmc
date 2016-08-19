@@ -21,9 +21,6 @@ target_link_libraries( LangevinDynamics FourierSeries Dynamics Options)
 
 add_library(LikelihoodFreeMCMC LikelihoodFreeMCMC.cpp)
 
-add_library(SequentialLFMCMC SequentialLFMCMC.cpp)
-target_link_libraries( SequentialLFMCMC FourierSeries )
-
 add_library(Options Options.cpp)
 
 add_library(OUDynamics OUDynamics.cpp)

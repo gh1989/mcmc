@@ -24,6 +24,7 @@ namespace MCMC
 class OUDynamics : public DynamicsBase
 {
     public:
+    
         typedef double ParameterPointType;    
         typedef Tensor<ParameterPointType, 1> ParameterType;
         typedef Tensor<ParameterPointType, 2> ParameterChainType;
@@ -48,13 +49,18 @@ class OUDynamics : public DynamicsBase
         int parameter_dimension(){ return _parameter_dimension; }
         int parameter_dimension( const Options& o ){ return _parameter_dimension; }
 
-        void output_file_timeseries(ParameterChainType &ccc, SigmaChainType &sss);
+        void output_file_timeseries(ParameterChainType &ccc, SigmaChainType &sss, std::ofstream &mcmc_file);
         void forward_sim( gsl_rng *r, ParameterType &c, double log_sigma, int k, int l, int m, PathType &out );    
 
         double log_transition(ParameterType &c_star, ParameterType &c);
         double log_prior(ParameterType &c);
         double log_path_likelihood( PathType &x, ParameterType &c, double log_sigma, CoarsePathType &y, int k, int l, int m );
         double sample_transition_density(gsl_rng *r, double c );
+        
+        static std::string dynamics_string()
+        {
+            return "OU_";
+        }
         
         static ParameterType default_parameters( Options& o )
         {

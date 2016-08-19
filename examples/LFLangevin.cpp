@@ -6,8 +6,21 @@
 #include "Options.h"
 #include "LangevinDynamics.h"
 
-/* No diffusion constant inference:
-./bin/LFLangevin -K 25 -N 10000 -o 0.0002 -p 0.01 -c 0.001 -l -6.8
+/*
+
+Drift:
+
+Good.
+./bin/LFLangevin -N 5000 -Q 10 -K 50 -M 1 -P 32 -o 0.004 -p 0.0001 -R 123 -c 0.1 -i 0 -B 0
+
+Better.
+./bin/LFLangevin -N 5000 -Q 10 -K 50 -M 1 -P 32 -o 0.004 p 0.0001 -R 123 -c 0.04 -i 0 -B 0
+
+Diffusion:
+./bin/LFLangevin -N 5000 -K 1 -M 1 -P 8 -o 0.1 -p 0.0001 -d 10.0 -i 1 -D 0 -B 1000
+
+
+
 */
 
 using namespace MCMC;

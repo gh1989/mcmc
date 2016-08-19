@@ -4,8 +4,9 @@
 #ifndef M_PI
     #define M_PI 3.14159265359
 #endif
-
+#include <chrono>
 #include <iostream>
+#include <fstream>
 #include <Eigen/Dense>
 #include <Eigen/CXX11/Tensor>
 #include <gsl/gsl_rng.h>
@@ -85,6 +86,10 @@ public:
     
     Options& opts(){ return _opts; }
     Dynamics_& dynamics(){return _dynamics;}
+    
+    ParameterType& current_drift(){ return c; }
+    double current_log_sigma() { return log_sigma; }
+    
 private:
     void setup_observed_starts( gsl_rng *r, CoarsePathType &y, PathType &out );
     void generate_random_starts( gsl_rng *r, PathType &out );
@@ -108,15 +113,19 @@ private:
     ParameterType           c_star;
     ParameterType           real_c;
     ParameterChainType      parameter_chain;
+    ParameterType           c_average;
     
     double                  log_real_sigma;
     double                  log_sigma_star;
     double                  log_sigma;  
     SigmaChainType          log_sigma_chain; 
+    double                  log_sigma_average;
     
     bool    infer_drift_parameters;
     bool    infer_diffusion_parameters;
     
+    std::ofstream mcmc_file;
+    std::string filename;
 };
  
 } 
@@ -194,9 +203,17 @@ double LikelihoodFreeMCMC<Dynamics_>::log_path_likelihood(  PathType &path, Para
 template<class Dynamics_>
 void LikelihoodFreeMCMC<Dynamics_>::store_chain(int n)
 {
-    for( size_t i=0; i<c_dim; ++i)
-        parameter_chain(n, i) = c(i);
-    log_sigma_chain(n) = log_sigma;
+    if (_opts.store_time_series())
+    {
+        for( size_t i=0; i<c_dim; ++i)
+            parameter_chain(n, i) = c(i);
+        log_sigma_chain(n) = log_sigma;
+    }
+    else
+    {
+        //c_average += c;
+        log_sigma_average += log_sigma;
+    }
 }
 
 template<class Dynamics_>
@@ -210,7 +227,31 @@ void LikelihoodFreeMCMC<Dynamics_>::accept()
 template<class Dynamics_>
 void LikelihoodFreeMCMC<Dynamics_>::finish() 
 {
-    _dynamics.output_file_timeseries( parameter_chain, log_sigma_chain );
+    // experiment options
+    mcmc_file.open( filename );
+    
+    if (_opts.store_time_series())
+    {
+
+    _opts.print_header( mcmc_file );
+    _dynamics.output_file_timeseries( parameter_chain, log_sigma_chain, mcmc_file );
+    
+    }
+    else
+    {
+        log_sigma_average /= N;
+    
+        //for( size_t i=0; i<c_dim; ++i)
+        //    c_average(i) = c_average(i)/double(N);
+    
+        mcmc_file << "log_sigma_average" << std::endl;
+        mcmc_file << log_sigma_average << std::endl;
+    
+        //mcmc_file << "c_average" << std::endl;
+        //mcmc_file << c_average << std::endl;
+    }
+    
+    mcmc_file.close();
 }
 
 
@@ -350,6 +391,17 @@ void LikelihoodFreeMCMC<Dynamics_>::setup_from_options(Options &o)
     
     log_sigma_chain         = SigmaChainType(N);    
     
+    unsigned long int milliseconds_since_epoch = 
+    std::chrono::duration_cast<std::chrono::milliseconds>
+        (std::chrono::system_clock::now().time_since_epoch()).count();
+        
+    filename = "output/";
+    filename += _opts.output_subfolder();
+    filename += "/LFTimeSeries_";
+    filename += Dynamics_::dynamics_string();
+    filename += std::to_string( milliseconds_since_epoch );
+    filename += ".txt";
+
 }
 
 #endif

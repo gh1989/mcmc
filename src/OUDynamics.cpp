@@ -4,6 +4,7 @@
 
 using namespace MCMC;
 
+
 double OUDynamics::sample_transition_density(gsl_rng *r, double c )
 {
     double sigma = _opts.parameter_proposal_sigma();
@@ -70,22 +71,18 @@ void OUDynamics::forward_sim( gsl_rng *r, ParameterType &c, double log_sigma, in
 }
 
 
-void OUDynamics::output_file_timeseries(ParameterChainType &ccc, SigmaChainType &sss)
+void OUDynamics::output_file_timeseries(ParameterChainType &ccc, SigmaChainType &sss, std::ofstream &mcmc_file)
 {
 
     std::cout<<"OUDynamics::output_file_timeseries"<<std::endl;
     size_t N  = _opts.mcmc_trials();
-
-    std::ofstream mcmc_file;
-    mcmc_file.open ("output/ou_mcmc_timeseries.txt");
-
-    for( size_t n=0; n<N; ++n )
+    size_t burn_in = _opts.burn();
+    for( size_t n=burn_in; n<N; ++n )
     {
         mcmc_file << ccc(n,0);
         mcmc_file << "\t";
         mcmc_file << sss(n);
         mcmc_file << std::endl;
     }
-    mcmc_file.close();
 
 }
