@@ -203,8 +203,9 @@ void ParticleMCMC<Dynamics_>::propose( gsl_rng *r )
 {
     if( infer_drift_parameters )
     {
-        for( size_t i=0; i<c_dim; ++i)
-            c_star(i) = _dynamics.sample_transition_density(r, c(i));
+        //for( size_t i=0; i<c_dim; ++i)
+        //    c_star(i) = _dynamics.sample_transition_density(r, c(i));
+        c_star(c_dim-1) = _dynamics.sample_transition_density(r, c(c_dim-1));
     }
     else
         c_star = c;

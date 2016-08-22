@@ -47,7 +47,7 @@ class Options
         int cutoff() const { return _cutoff; }
         int number_particles() const {return _number_particles;}
         
-        double log_real_sigma() const {return _log_real_sigma;}
+        double log_real_sigma() const {return log(_real_sigma);}
         double log_start_sigma() const {return _log_start_sigma;}
         double parameter_proposal_sigma() const { return _parameter_proposal_sigma; }
         double observation_noise_sigma() const { return _observation_noise_sigma; }
@@ -66,7 +66,7 @@ class Options
         void set_parameter_proposal_sigma( double d ){ _parameter_proposal_sigma=d; }
         void set_observation_noise_sigma( double d ){ _observation_noise_sigma=d; }
         void set_trajectory_path_delta( double d ){ _trajectory_path_delta=d; }
-        void set_log_real_sigma(double d){_log_real_sigma=d;}
+        void set_real_sigma(double d){_real_sigma=d;}
         void set_infer_diffusion_parameters(bool b){_infer_diffusion_parameters=b;}; 
         void set_infer_drift_parameters(bool b){_infer_drift_parameters=b;};
     
@@ -97,7 +97,7 @@ class Options
         double _parameter_proposal_sigma;
         double _observation_noise_sigma;
         double _trajectory_path_delta;
-        double _log_real_sigma;
+        double _real_sigma;
         double _log_start_sigma;
         double _parameter_proposal_diffusion_sigma;
         

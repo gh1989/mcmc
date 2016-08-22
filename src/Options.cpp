@@ -15,7 +15,7 @@ void Options::default_values()
     _parameter_proposal_sigma     = 0.05;
     _observation_noise_sigma      = 0.1;
     _trajectory_path_delta        = 0.001;
-    _log_real_sigma               = log( 0.001 );
+    _real_sigma                   = 0.001;
     _log_start_sigma              = 0.0; 
     _parameter_proposal_diffusion_sigma = 0.1;
     
@@ -39,10 +39,15 @@ Options::Options( int argc, char *argv[] )
     default_values();
 
     // Get options from command line.
-    while( ( opt = getopt( argc, argv, ":R:K:P:N:B:M:c:o:p:g:l:d:D:i:Q:" ) ) != EOF ) 
+    while( ( opt = getopt( argc, argv, ":a:R:K:P:N:B:M:c:o:p:g:l:d:D:i:Q:" ) ) != EOF ) 
     {
     switch (opt)
         {
+            case 'a':
+            _output_subfolder = std::string( optarg );
+            std::cout << "set _output_subfolder = " << _output_subfolder << std::endl;
+            break;
+            
             case 'R':
             _rng_seed = atoi(optarg);
             std::cout << "set _rng_seed = " << _rng_seed << std::endl;
@@ -94,8 +99,8 @@ Options::Options( int argc, char *argv[] )
             break;
             
             case 'l':
-            _log_real_sigma = atof(optarg);
-            std::cout<< "set _log_real_sigma ="<< _log_real_sigma << std::endl;
+            _real_sigma = atof(optarg);
+            std::cout<< "set _real_sigma ="<< _real_sigma << std::endl;
             break;
             
             case 'd':
@@ -124,7 +129,7 @@ Options::Options( int argc, char *argv[] )
 
 void Options::print_header( std::ofstream &file )
 {
-    file << "#_log_real_sigma: " << _log_real_sigma <<std::endl;
+    file << "#_real_sigma: " << _real_sigma <<std::endl;
     file << "#_observation_noise_sigma: " << _observation_noise_sigma <<std::endl;
     file << "#_path_length: "  << _path_length <<std::endl;
     file << "#_extra_data_ratio: " << _extra_data_ratio <<std::endl;
@@ -135,7 +140,7 @@ void Options::print_header( std::ofstream &file )
 void Options::print_options( std::ostream &o )
 {
     o << "_output_subfolder = " << _output_subfolder <<std::endl;
-    o << "_log_real_sigma = " << _log_real_sigma <<std::endl;
+    o << "_real_sigma = " << _real_sigma <<std::endl;
     o << "_observation_noise_sigma = " << _observation_noise_sigma <<std::endl;
     o << "_path_length = "  << _path_length <<std::endl;
     o << "_extra_data_ratio = " << _extra_data_ratio <<std::endl;

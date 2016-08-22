@@ -1,33 +1,45 @@
 library(zoo)
-par(mfrow=c(5,2) ,oma = c(0, 0, 2, 0) )
+library(mcmcse)
+
+par(mfrow=c(5,4) ,oma = c(0, 0, 2, 0) )
 par(mar=c(4,2,2,4))
 
+first_plot = 5
+density_plots = c(2,3)
+ptys=c(2,3)
+tune_variable = "parallel_paths"
+nice_name = "Parallel Paths"
+log_xy = 'xy'
+source("C:/cygwin64/home/Gregg/mcmc/scripts/lf_mcmc_tuning_o.r")
 
-for(subfolder in list.dirs(full.names = FALSE))
-{
-  if (subfolder != "")
-  {
-  setwd(sprintf("C:/cygwin64/home/Gregg/mcmc/output/%s",subfolder))
-  list_of_files = list.files(pattern="LangevinTimeSeries_.*.txt")
-  len = length(list_of_files)
-  a = numeric(len)
-  b = numeric(len)
-  c = numeric(len)
-  
-  for(i in 1:len)
-  {
-    mcmc_data = read.table(list_of_files[i])
-    x <- head( readLines(list_of_files[i]))
-    meta_data_string <- grep( pattern=subfolder, x, value=TRUE)
-    real_parts = mcmc_data[7:7]
-    imag_parts = mcmc_data[8:8]
-    a[i] = var(as.numeric(unlist(real_parts)))
-    b[i] = var(as.numeric(unlist(imag_parts)))
-    c[i] = as.numeric( gsub("[^0-9.]", "", meta_data_string) )
-  }
-  
-  plot(c, a, log='y', xlab=subfolder, ylab="var", main="Re")
-  plot(c, b, log='y', xlab=subfolder, ylab="var", main="Im")
-  #mtext("Parameter proposal variance vs. posterior variance.", outer=TRUE, cex=1.5)
-  }
-}
+first_plot = 7
+density_plots = c(2,3)
+ptys=c(2,3)
+tune_variable = "path_length"
+nice_name = "Path Length"
+log_xy = 'xy'
+source("C:/cygwin64/home/Gregg/mcmc/scripts/lf_mcmc_tuning_o.r")
+
+first_plot = 1
+density_plots = c(2,4)
+ptys=c(2,3,4,5)
+tune_variable = "extra_data_ratio"
+nice_name = "Extra Data Ratio"
+log_xy = 'xy'
+source("C:/cygwin64/home/Gregg/mcmc/scripts/lf_mcmc_tuning_o.r")
+
+first_plot = 1
+density_plots = c(2,3)
+ptys=c(2,3)
+tune_variable = "observation_noise_sigma"
+nice_name = "Observation Noise"
+log_xy = 'xy'
+source("C:/cygwin64/home/Gregg/mcmc/scripts/lf_mcmc_tuning_o.r")
+
+first_plot = 1
+density_plots = c(2,3)
+ptys=c(2,3)
+tune_variable = "real_sigma"
+nice_name = "Diffusion Coefficient"
+log_xy = 'xy'
+source("C:/cygwin64/home/Gregg/mcmc/scripts/lf_mcmc_tuning_o.r")

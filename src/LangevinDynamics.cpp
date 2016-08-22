@@ -21,13 +21,14 @@ double LangevinDynamics::log_transition(ParameterType &c_star, ParameterType &c)
 
 double LangevinDynamics::log_prior(ParameterType &c)
 {
+    // Changed for one parameter model.
     double log_total = 0;
     double parameter_sigma = _opts.parameter_proposal_sigma();
     double exponential_constant = 0.5 / (parameter_sigma * parameter_sigma);
     int c_dim = parameter_dimension();
 
-    for( size_t i=0; i<c_dim; ++i)
-        log_total -= exponential_constant*( pow( std::abs(c(i)), 2) );
+    //for( size_t i=0; i<c_dim; ++i)
+    log_total -= exponential_constant*( pow( std::abs(c(c_dim-1)), 2) );
 
     return log_total;
 }
