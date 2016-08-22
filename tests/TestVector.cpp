@@ -10,6 +10,10 @@
 #include "Options.h"
 #include "Particle.h"
 
+/*
+./tests/TestVector -M 30 -Q 500 -o 0.01 -p 0.0002 -K 1 -l 0.1 -P 4
+*/
+
 using namespace std;
 
 /*
@@ -30,9 +34,13 @@ int main( int argc, char *argv[] )
     size_t K = o.parallel_paths();
     size_t L = o.path_length();
     size_t M = o.extra_data_ratio();
-    
+   
+    std::cout<< "M = " << M << std::endl;
+ 
     auto ld = LangevinDynamics(o);
     auto  c = ld.default_parameters(o);
+    //for(size_t i =0; i<4; ++i)
+    //    c(i) = 0;
     
     std::vector<std::shared_ptr<Particle<LangevinDynamics>>> particles;
     std::vector<std::shared_ptr<Particle<LangevinDynamics>>> resampled;

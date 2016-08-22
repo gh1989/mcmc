@@ -40,7 +40,7 @@ sigmaSummary <- function( mcmc_data )
   plot(rollmean(ts(mcmc_data[9:9]),100))
   acf(mcmc_data[9:9])
   print(mean(ts(mcmc_data[9:9])))
-  hist( ts(mcmc_data[9:9]), breaks=25, freq=FALSE, main="Posterior Distribution")
+  plot( density(ts(mcmc_data[9:9])), main="Posterior Distribution")
   #print(mean(ts(mcmc_data[9:9])))
   #print(sd(ts(mcmc_data[9:9])))
 }
@@ -50,8 +50,8 @@ plotHistogramFromFilename<-function(f)
 {
   mcmc_data = read.table(f)
   #histgramsModes(mcmc_data)
-  mcmcSummary2d(mcmc_data)
-  #sigmaSummary(mcmc_data)
+  #mcmcSummary2d(mcmc_data)
+  sigmaSummary(mcmc_data)
 }
   
 

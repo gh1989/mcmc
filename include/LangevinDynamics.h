@@ -25,6 +25,7 @@ using namespace MCMC;
 namespace MCMC
 {
 
+//A basic one mode potential Langevin class
 class LangevinDynamics : public DynamicsBase {
     
     public:    
