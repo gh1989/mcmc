@@ -1,4 +1,4 @@
 cmake_minimum_required (VERSION 3.0)
 project (MCMC)
-subdirs(src tests examples)
+subdirs(src tests experiments)
 enable_testing()
