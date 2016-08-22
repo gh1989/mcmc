@@ -35,7 +35,7 @@ for(i in 1:len)
 ylim <- c( min(real_var,imag_var), max(real_var, imag_var) )
 plot(var_x, real_var, log=log_xy, xlab=nice_name, ylab="Posterior Variance", main="", pch=2, col="red", ylim=ylim)
 points(var_x, imag_var, log=log_xy, main="Im", pch=5, col="blue")
-legend('topright',c("Re","Im"), lty=1, xpd=TRUE, inset=c(-0.25,0), col=c('red', 'blue'), bty='n', cex=.75, pch=c(2,5))
+legend('topright',c("Re","Im"), lty=1, xpd=TRUE, inset=c(-0.5,0), col=c('red', 'blue'), bty='n', cex=.75, pch=c(2,5))
 
 ###################################
 # ESS                             #
@@ -44,7 +44,7 @@ ylim <- c( min(real_ess,imag_ess), max(real_ess, imag_ess) )
 plot(var_x, real_ess, log=log_xy, xlab=nice_name, ylab="ESS", main="", pch=2, col="red", ylim=ylim)
 points(var_x, imag_ess, log=log_xy, main="Im", pch=5, col="blue")
 
-legend('topright',c("Re","Im"), lty=1, xpd=TRUE, inset=c(-0.25,0), col=c('red', 'blue'), bty='n', cex=.75, pch=c(2,5))
+legend('topright',c("Re","Im"), lty=1, xpd=TRUE, inset=c(-0.5,0), col=c('red', 'blue'), bty='n', cex=.75, pch=c(2,5))
 
 ###################################
 # Real part posterior for given K #
@@ -59,7 +59,7 @@ meta_data_string <- grep( pattern=tune_variable, x, value=TRUE)
 vals[1] = as.numeric( gsub("[^0-9.]", "", meta_data_string) )
 print(vals[1])
 real_parts = mcmc_data[7:7]
-plot(density(ts(real_parts)), pty=1, main="Posterior Re", xlim=c(0,0.55), ylim=c(0,25), xpd=TRUE, inset=c(-0.25,0) )
+plot(density(ts(real_parts)), pty=1, main="Posterior Re", xlim=c(0,0.55) )
 
 for(i in 1:length(density_plots) )
 {  
@@ -72,7 +72,7 @@ for(i in 1:length(density_plots) )
   vals[i+1] = as.numeric( gsub("[^0-9.]", "", meta_data_string) )
   print(vals[i+1])
 }
-legend('topright',as.character(vals), bty='n', xpd=TRUE, inset=c(-0.30,0),
+legend('topright',as.character(vals), bty='n', xpd=TRUE, inset=c(-0.4,0),
        cex=.75, lty=c(1, 2, 3) )
 
 ###################################
@@ -88,7 +88,7 @@ meta_data_string <- grep( pattern=tune_variable, x, value=TRUE)
 vals[1] = as.numeric( gsub("[^0-9.]", "", meta_data_string) )
 print(vals[1])
 imag_parts = mcmc_data[8:8]
-plot(density(ts(imag_parts)), pty=1, main="Posterior Im", xlim=c(-0.55,0), ylim=c(0,25) )
+plot(density(ts(imag_parts)), pty=1, main="Posterior Im", xlim=c(-0.55,0) )
 
 for(i in 1:length(density_plots) )
 {  
@@ -101,7 +101,7 @@ for(i in 1:length(density_plots) )
   vals[i+1] = as.numeric( gsub("[^0-9.]", "", meta_data_string) )
   print(vals[i+1])
 }
-legend('topright',as.character(vals), bty='n', cex=.75, lty=c(1, 2, 3), xpd=TRUE, inset=c(-0.3,0))
+legend('topright',as.character(vals), bty='n', cex=.75, lty=c(1, 2, 3), xpd=TRUE, inset=c(-0.4,0))
 
 
 #mtext("Path Length", outer=TRUE, cex=1.5)
