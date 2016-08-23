@@ -51,7 +51,7 @@ double OUDynamics::log_path_likelihood( PathType &x, ParameterType &c, double lo
     return log_total;
 }
 
-void OUDynamics::forward_sim( gsl_rng *r, ParameterType &c, double log_sigma, int k, int l, int m, PathType &out )
+void OUDynamics::forward_sim( gsl_rng *r, ParameterType &c, double log_sigma, CoarsePathType &y, int k, int l, int m, PathType &out )
 {
     int M = _opts.extra_data_ratio();
     double dt = _opts.trajectory_path_delta();

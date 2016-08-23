@@ -213,7 +213,7 @@ void ParticleMCMC<Dynamics_>::propose( gsl_rng *r )
     double log_sigma_proposal_standard_deviation = _opts.parameter_proposal_diffusion_sigma();
     
     if( infer_diffusion_parameters )
-        log_sigma_star = gsl_ran_gaussian(r, log_sigma_proposal_standard_deviation );
+        log_sigma_star = gsl_ran_gaussian(r, log_sigma_proposal_standard_deviation ) + log_sigma;
     else
         log_sigma_star = log_sigma;
 
@@ -247,9 +247,9 @@ void ParticleMCMC<Dynamics_>::trajectory(   gsl_rng *r,
       {
         for( size_t m=1; m<M; ++m )
         {
-          _dynamics.forward_sim(r, c_, log_sigma_, k, l, m, out);   
+          _dynamics.forward_sim(r, c_, log_sigma_, observed, k, l, m, out);   
         }
-        _dynamics.forward_sim(r, c_, log_sigma_, k, l+1, 0, out);
+        _dynamics.forward_sim(r, c_, log_sigma_, observed, k, l+1, 0, out);
       }
 }
 
@@ -301,7 +301,11 @@ double ParticleMCMC<Dynamics_>::smc(gsl_rng *r)
     for(size_t i=0; i<num_particles; ++i) 
         total += exp( W(0, i) ); 
        
-    phat(0) = (1.0/num_particles)*total;
+    phat(0) = -log(num_particles);
+    
+    for(size_t i=0; i<num_particles; ++i)
+        phat(0) += W(0, i); 
+    
     resample_with_replacement(r, 0);   
     
     std::cout << "c_star" << c_star << std::endl;
@@ -312,7 +316,7 @@ double ParticleMCMC<Dynamics_>::smc(gsl_rng *r)
         // Generate particle samples.
         for(size_t i=0; i<num_particles; ++i)     
         {
-            particles[i]->forward_sim(r, c_star, log_sigma_star, t );
+            particles[i]->forward_sim(r, c_star, log_sigma_star, observed, t );
             W(t, i) = particles[i]->unnormal_weight(t, c_star, log_sigma_star, observed);
         }
         
@@ -321,14 +325,17 @@ double ParticleMCMC<Dynamics_>::smc(gsl_rng *r)
         for(size_t i=0; i<num_particles; ++i) 
             total += exp( W(t, i) );
         
-        phat(t) = phat(t-1) * (1.0/num_particles)*total;
+        phat(t) = phat(t-1) - log(num_particles);
+        
+        for(size_t i=0; i<num_particles; ++i)
+            phat(t) += W(t, i); 
         
         // Resample the particles based on weights.
         resample_with_replacement(r, t);
     }
 
-    // Return the marginal estimate.
-    return log( phat(L-1) );
+    // Return the log marginal estimate.
+    return phat(L-1);
 }
 
 template<class Dynamics_>

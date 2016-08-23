@@ -50,7 +50,7 @@ class OUDynamics : public DynamicsBase
         int parameter_dimension( const Options& o ){ return _parameter_dimension; }
 
         void output_file_timeseries(ParameterChainType &ccc, SigmaChainType &sss, std::ofstream &mcmc_file);
-        void forward_sim( gsl_rng *r, ParameterType &c, double log_sigma, int k, int l, int m, PathType &out );    
+        void forward_sim( gsl_rng *r, ParameterType &c, double log_sigma, CoarsePathType &y, int k, int l, int m, PathType &out );    
 
         double log_transition(ParameterType &c_star, ParameterType &c);
         double log_prior(ParameterType &c);

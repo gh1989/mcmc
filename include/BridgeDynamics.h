@@ -1,5 +1,5 @@
-#ifndef LANGEVIN_DYNAMICS_H
-#define LANGEVIN_DYNAMICS_H
+#ifndef BRIDGE_DYNAMICS_H
+#define BRIDGE_DYNAMICS_H
 
 #include <string>
 #include <fstream>
@@ -25,8 +25,7 @@ using namespace MCMC;
 namespace MCMC
 {
 
-//A basic one mode potential Langevin class
-class LangevinDynamics : public DynamicsBase {
+class BridgeDynamics : public DynamicsBase {
     
     public:    
     
@@ -38,29 +37,29 @@ class LangevinDynamics : public DynamicsBase {
         typedef Tensor<double, 4> PathType;    
         typedef Tensor<double, 1> SigmaChainType;
         
-        LangevinDynamics(Options &o) : _opts(o), DynamicsBase(o)
+        BridgeDynamics(Options &o) : _opts(o), DynamicsBase(o)
         {
-             std::cout<<  "LangevinDynamics(Options &o) called in " << this << std::endl;
+             std::cout<<  "BridgeDynamics(Options &o) called in " << this << std::endl;
              _cutoff = _opts.cutoff();
              _parameter_dimension = 2*_cutoff*(_cutoff+1);
         }
 
         // Do not instantiate without options.
-        LangevinDynamics() = delete;
+        BridgeDynamics() = delete;
         
-        LangevinDynamics(const LangevinDynamics& other) : _opts(other.opts()), DynamicsBase(other.opts())
+        BridgeDynamics(const BridgeDynamics& other) : _opts(other.opts()), DynamicsBase(other.opts())
         {
             _cutoff = _opts.cutoff();
             _parameter_dimension = 2*_cutoff*(_cutoff+1);
         }
          
-        LangevinDynamics(const LangevinDynamics&& other): _opts(other.opts()), DynamicsBase(other.opts())
+        BridgeDynamics(const BridgeDynamics&& other): _opts(other.opts()), DynamicsBase(other.opts())
         {
             _cutoff = _opts.cutoff();
             _parameter_dimension = 2*_cutoff*(_cutoff+1);
         }
  
-        LangevinDynamics& operator=(const LangevinDynamics& other)
+        BridgeDynamics& operator=(const BridgeDynamics& other)
         {
             _opts = other.opts();
             _cutoff = _opts.cutoff();
@@ -68,7 +67,7 @@ class LangevinDynamics : public DynamicsBase {
             return *this;
         }
         
-        LangevinDynamics& operator=(const LangevinDynamics&& other)
+        BridgeDynamics& operator=(const BridgeDynamics&& other)
         {
             _opts = other.opts();
             _cutoff = _opts.cutoff();
@@ -76,7 +75,7 @@ class LangevinDynamics : public DynamicsBase {
             return *this;
         }
         
-        ~LangevinDynamics()
+        ~BridgeDynamics()
         {}
         
         int parameter_dimension()
@@ -92,7 +91,7 @@ class LangevinDynamics : public DynamicsBase {
 
         static std::string dynamics_string()
         {
-            return "Langevin_";
+            return "Bridge_";
         }
         
         void output_file_timeseries(ParameterChainType &ccc, SigmaChainType &sss, std::ofstream &mcmc_file);
@@ -101,6 +100,7 @@ class LangevinDynamics : public DynamicsBase {
         double log_prior(ParameterType &c);
         double log_transition(ParameterType &c_star, ParameterType &c);
         double log_path_likelihood( PathType &x, ParameterType &c, double sigma, CoarsePathType &y, int k, int l, int m );
+        double log_bridge_likelihood( PathType &x, ParameterType &c, double log_sigma, CoarsePathType &y, int k, int l, int m);
 
         static ParameterType default_parameters( Options& o )
         {
@@ -123,7 +123,7 @@ class LangevinDynamics : public DynamicsBase {
         int _parameter_dimension;
 
 
-}; // end of class LangevinDynamics
+}; // end of class BridgeDynamics
 
 }
 #endif

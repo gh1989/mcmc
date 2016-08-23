@@ -2,7 +2,6 @@
 #include <iostream>
 
 #include "Algorithm.h"
-#include "ParticleMCMC.h"
 #include "Options.h"
 #include "LangevinDynamics.h"
 

@@ -1,6 +1,8 @@
 #ifndef PARTICLE_H
 #define PARTICLE_H
 
+#include "BridgeDynamics.h"
+
 using namespace MCMC;
 
 namespace MCMC
@@ -67,7 +69,7 @@ public:
 
     double unnormal_weight( size_t t, ParameterType &c, double sigma, CoarsePathType &y);
     void setup_starts(gsl_rng *r, CoarsePathType &y);
-    void forward_sim(gsl_rng *r, ParameterType &c, double sigma, size_t t );
+    void forward_sim(gsl_rng *r, ParameterType &c, double sigma, CoarsePathType &y, size_t t );
     const PathType& path() const { return x; }
     const Dynamics_& dynamics() const { return _dynamics; }
     const size_t parallel_paths() const { return K; }
@@ -82,12 +84,33 @@ private:
     Dynamics_ _dynamics;
 };
 
+
 template<class Dynamics_>
 double Particle<Dynamics_>::unnormal_weight(size_t t, ParameterType &c, double sigma, CoarsePathType &y)
 {   
     double log_total = 0;
     for( size_t k=0; k<K; ++k )
         log_total += _dynamics.log_path_likelihood( x, c, sigma, y, k, t, 0 );
+    return log_total;
+}
+
+template<>
+double Particle<BridgeDynamics>::unnormal_weight(size_t tplus1, ParameterType &c, double log_sigma, CoarsePathType &y)
+{   
+    double log_total = 0;
+      
+    for( size_t k=0; k<K; ++k )
+    {
+        for(size_t m=1; m<M; ++m)
+        {
+            log_total += _dynamics.log_path_likelihood( x, c, log_sigma, y, k, tplus1-1, m );
+            log_total -= _dynamics.log_bridge_likelihood( x, c, log_sigma, y, k, tplus1-1, m);   
+        }
+        log_total += _dynamics.log_path_likelihood( x, c, log_sigma, y, k, tplus1, 0 );   
+    }        
+
+    //std::cout<<"Particle<BridgeDynamics>::unnormal_weight log_total:" << log_total << std::endl;
+    
     return log_total;
 }
 
@@ -102,15 +125,16 @@ void Particle<Dynamics_>::setup_starts(gsl_rng *r, CoarsePathType &y)
 }
 
 template<class Dynamics_>
-void Particle<Dynamics_>::forward_sim(gsl_rng *r, ParameterType &c, double sigma, size_t t )
+void Particle<Dynamics_>::forward_sim(gsl_rng *r, ParameterType &c, double sigma, CoarsePathType &y, size_t tplus1 )
 {
     /*
     Forward simulate from (t,t+1]
     */    
     for( size_t k=0; k<K; ++k )
     {
-        for( size_t m=1; m<M; ++m ) _dynamics.forward_sim(r, c, sigma, k, t-1, m, x);   
-        _dynamics.forward_sim(r, c, sigma, k, t, 0, x);
+        for( size_t m=1; m<M; ++m )
+            _dynamics.forward_sim(r, c, sigma, y, k, tplus1-1, m, x);   
+        _dynamics.forward_sim(r, c, sigma, y, k, tplus1, 0, x);
     }  
 }
 

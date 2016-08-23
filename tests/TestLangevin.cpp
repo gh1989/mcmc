@@ -78,6 +78,8 @@ const lest::test specification[] =
         Options opts;
         LangevinDynamics ld( opts );
 
+        LangevinDynamics::CoarsePathType y(1,1,1);
+        
         opts.set_observation_noise_sigma( 0.5 );
         double log_sigma = log(0.01);
         
@@ -106,9 +108,9 @@ const lest::test specification[] =
         {
         for( size_t m=1; m<M; ++m )
         {
-        ld.forward_sim(r, c, log_sigma, k, l, m, x);   
+        ld.forward_sim(r, c, log_sigma, y, k, l, m, x);   
         }
-        ld.forward_sim(r, c, log_sigma, k, l+1, 0, x);
+        ld.forward_sim(r, c, log_sigma, y, k, l+1, 0, x);
         }
 
          for( size_t k=0; k<K; ++k )

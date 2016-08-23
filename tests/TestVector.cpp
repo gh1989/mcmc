@@ -39,15 +39,18 @@ int main( int argc, char *argv[] )
  
     auto ld = LangevinDynamics(o);
     auto  c = ld.default_parameters(o);
-    //for(size_t i =0; i<4; ++i)
-    //    c(i) = 0;
     
+    if (!o.infer_drift_parameters())
+    for(size_t i =0; i<4; ++i)
+        c(i) = 0;
+
     std::vector<std::shared_ptr<Particle<LangevinDynamics>>> particles;
     std::vector<std::shared_ptr<Particle<LangevinDynamics>>> resampled;
        
     Particle<LangevinDynamics>::CoarsePathType observed(K, L, 2);
     Particle<LangevinDynamics>::PathType real(K,L,M,2);
     
+   
     double log_sigma = o.log_real_sigma();
     
     Tensor<double, 1> phat(L);
@@ -66,9 +69,9 @@ int main( int argc, char *argv[] )
         {
         for( size_t m=1; m<M; ++m )
         {
-            ld.forward_sim(r, c, log_sigma, k, l, m, real);   
+            ld.forward_sim(r, c, log_sigma, observed, k, l, m, real);   
         }
-        ld.forward_sim(r, c, log_sigma, k, l+1, 0, real);
+        ld.forward_sim(r, c, log_sigma, observed, k, l+1, 0, real);
         }
     }
     
@@ -76,7 +79,7 @@ int main( int argc, char *argv[] )
     double observation_sigma = o.observation_noise_sigma();
     double random_noise_x;
     double random_noise_y;
-
+    
     for( size_t k=0; k<K; ++k )
     {
         for( size_t l=0; l<L; ++l )
@@ -106,7 +109,10 @@ int main( int argc, char *argv[] )
     for(size_t i=0; i<num_particles; ++i) 
         total += exp( W(0, i) ); 
     
-    phat(0) = (1.0/num_particles)*total;
+    phat(0) = -log(num_particles);
+    
+    for(size_t i=0; i<num_particles; ++i)
+        phat(0) +=  particles[i]->unnormal_weight(0, c, log_sigma, observed);
     
     unsigned int resample_particle_index;
     double p[num_particles];
@@ -131,14 +137,18 @@ int main( int argc, char *argv[] )
     {   
         for(size_t i=0; i<num_particles; ++i)
         {  
-            particles[i]->forward_sim(r, c, log_sigma, t); // It was here... t changed to t-1
+            particles[i]->forward_sim(r, c, log_sigma, observed, t); // It was here... t changed to t-1
             W(t,i) = particles[i]->unnormal_weight(t, c, log_sigma, observed);
         } 
         
         // Calculate a part of the marginal.
         total = 0;
         for(size_t i=0; i<num_particles; ++i) 
+        {
+            std::cout<< "W(" << t <<"," << i << ")" << " = " << W(t,i) << std::endl;
+            std::cout<< "exp( W(" << t <<"," << i << "))" << " = " << exp(W(t,i)) << std::endl;
             total += exp( W(t, i) );
+        }
         
         resampled = particles;
        
@@ -159,14 +169,14 @@ int main( int argc, char *argv[] )
         std::cout<<"total:" << total << std::endl;
         std::cout<<"(1.0/num_particles):" << (1.0/num_particles) << std::endl;
         std::cout<<"phat(t-1)"<< "with t-1=" << t-1 << " = " << phat(t-1) << std::endl; 
-        phat(t) = phat(t-1) * (1.0/num_particles)*total;
+        phat(t) = phat(t-1) - log(num_particles);
+        
+        for(size_t i=0; i<num_particles ; ++i)
+            phat(t) += W(t, i);
     }
     
-    std::cout<<"log_marginal "<< log( phat(L-1) ) << std::endl;
+    std::cout<<"log_marginal "<< phat(L-1) << std::endl;
     
-    std::string ts_file_name = "output/ts_smc.txt";
-    std::ofstream ts_file;
-    ts_file.open(ts_file_name);
     
     LangevinDynamics::PathType path;
 
@@ -185,6 +195,14 @@ int main( int argc, char *argv[] )
             p[i] *= exp( W(t, i) ) / total;
     }
 
+    /*
+     * File output.
+     */
+     
+    std::string ts_file_name = "output/ts_smc.txt";
+    std::ofstream ts_file;
+    ts_file.open(ts_file_name);
+     
     for(size_t l=0; l<L; ++l)
     {
         // Print for t=l

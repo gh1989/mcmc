@@ -50,7 +50,7 @@ sigmaSummary <- function( mcmc_data )
 plotHistogramFromFilename<-function(f)
 {
   mcmc_data = read.table(f)
-  histgramsModes(mcmc_data)
+  #histgramsModes(mcmc_data)
   mcmcSummary2d(mcmc_data)
   sigmaSummary(mcmc_data)
 }
@@ -58,5 +58,5 @@ plotHistogramFromFilename<-function(f)
 
 par(mar=c(4,2,2,4))
 
-list_of_files = list.files(pattern="LFTimeSeries_.*.txt")
+list_of_files = list.files(pattern="pMCMCTimeSeries_.*.txt")
 lapply(list_of_files, plotHistogramFromFilename)

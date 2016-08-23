@@ -27,7 +27,7 @@ public:
     
     ~DynamicsBase()
     {
-        std::cout<<"~DynamicsBase() called in "<< this << std::endl;
+        //std::cout<<"~DynamicsBase() called in "<< this << std::endl;
     }
     
     virtual double log_prior_sigma(double log_sigma);

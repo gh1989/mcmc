@@ -2,7 +2,7 @@
 # PLOTS         #
 #################
 mcmc_trials = 100000
-setwd(sprintf("C:/cygwin64/home/Gregg/mcmc/output/LFMCMC/%s",tune_variable))
+setwd(sprintf("C:/cygwin64/home/Gregg/mcmc/output/LFMCMC/%s/100k",tune_variable))
 
 ###################################
 # Standard deviation              #

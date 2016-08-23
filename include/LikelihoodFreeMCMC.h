@@ -174,7 +174,7 @@ void LikelihoodFreeMCMC<Dynamics_>::propose( gsl_rng *r )
     double log_sigma_proposal_standard_deviation = _opts.parameter_proposal_diffusion_sigma();
     
     if( infer_diffusion_parameters )
-        log_sigma_star = gsl_ran_gaussian(r, log_sigma_proposal_standard_deviation );
+        log_sigma_star = gsl_ran_gaussian(r, log_sigma_proposal_standard_deviation ) + log_sigma;
     else
         log_sigma_star = log_sigma;
     
@@ -279,9 +279,9 @@ void LikelihoodFreeMCMC<Dynamics_>::trajectory(   gsl_rng *r,
       {
         for( size_t m=1; m<M; ++m )
         {
-          _dynamics.forward_sim(r, c_, log_sigma_, k, l, m, out);   
+          _dynamics.forward_sim(r, c_, log_sigma_, observed, k, l, m, out);   
         }
-        _dynamics.forward_sim(r, c_, log_sigma_, k, l+1, 0, out);
+        _dynamics.forward_sim(r, c_, log_sigma_, observed, k, l+1, 0, out);
       }
 }
 
