@@ -28,8 +28,14 @@ target_link_libraries( LFOrnsteinUhlenbeck gsl gslcblas LikelihoodFreeMCMC Optio
 add_executable(LFLangevin LFLangevin.cpp)
 target_link_libraries( LFLangevin gsl gslcblas LikelihoodFreeMCMC Options LangevinDynamics FourierSeries)
 
+add_executable(Endpoints Endpoints.cpp)
+target_link_libraries(Endpoints LangevinDynamics FourierSeries BridgeDynamics gsl gslcblas Options)
+
+
 add_executable(PMCMC ParticleMCMC.cpp)
 target_link_libraries( PMCMC gsl gslcblas Options LangevinDynamics BridgeDynamics FourierSeries)
 
 add_executable(SMC SMC.cpp)
 target_link_libraries( SMC gsl gslcblas Options LangevinDynamics BridgeDynamics FourierSeries)
+
+
