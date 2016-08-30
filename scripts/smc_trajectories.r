@@ -40,10 +40,10 @@ for(i in 1:num_particles)
 
 for(i in 1:num_particles)
 {
-    d = as.numeric(1 - probs[i] / max_probs )
+    #d = as.numeric(1 - probs[i] / max_probs )
     if (probs[i] > 0.10*max_probs)
     {
-        p_col = rgb(0,1-d,0)
+        p_col = rgb(0,1,0)
         points(DF[(2*i-1):(2*i)], type="l", col=p_col, pch=3)
     }
 }

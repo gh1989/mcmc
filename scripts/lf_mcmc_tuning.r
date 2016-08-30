@@ -24,7 +24,7 @@ first_plot = 1
 density_plots = c(2,3)
 ptys=c(2,3,4,5)
 tune_variable = "extra_data_ratio"
-nice_name = "Extra Data Ratio"
+nice_name = "Steps Per Observations"
 log_xy = 'xy'
 source("C:/cygwin64/home/Gregg/mcmc/scripts/lf_mcmc_tuning_o.r")
 

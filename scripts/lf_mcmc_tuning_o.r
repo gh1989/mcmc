@@ -33,7 +33,7 @@ for(i in 1:len)
   print( var_x[i] )
 }
 ylim <- c( min(real_var,imag_var), max(real_var, imag_var) )
-plot(var_x, real_var, log=log_xy, xlab=nice_name, ylab="Posterior Variance", main="", pch=2, col="red", ylim=ylim)
+plot(var_x, real_var, log=log_xy, xlab=nice_name, ylab="Posterior Variance", main="Posterior Var.", pch=2, col="red", ylim=ylim)
 points(var_x, imag_var, log=log_xy, main="Im", pch=5, col="blue")
 legend('topright',c("Re","Im"), lty=1, xpd=TRUE, inset=c(-0.5,0), col=c('red', 'blue'), bty='n', cex=.75, pch=c(2,5))
 
@@ -41,7 +41,7 @@ legend('topright',c("Re","Im"), lty=1, xpd=TRUE, inset=c(-0.5,0), col=c('red', '
 # ESS                             #
 ###################################
 ylim <- c( min(real_ess,imag_ess), max(real_ess, imag_ess) )
-plot(var_x, real_ess, log=log_xy, xlab=nice_name, ylab="ESS", main="", pch=2, col="red", ylim=ylim)
+plot(var_x, real_ess, log=log_xy, xlab=nice_name, ylab="ESS", pch=2, col="red", ylim=ylim, main="ESS")
 points(var_x, imag_ess, log=log_xy, main="Im", pch=5, col="blue")
 
 legend('topright',c("Re","Im"), lty=1, xpd=TRUE, inset=c(-0.5,0), col=c('red', 'blue'), bty='n', cex=.75, pch=c(2,5))

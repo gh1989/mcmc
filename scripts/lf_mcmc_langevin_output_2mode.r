@@ -35,27 +35,27 @@ histgramsModes<-function( mcmc_data )
 
 sigmaSummary <- function( mcmc_data )
 {
-  par(mfrow = c(4, 1))
+  #par(mfrow = c(4, 3))
   mcmc_ts <- ts(mcmc_data[9:9])
-  plot(mcmc_ts, xlab="Iteration", ylab="")
-  plot(rollmean(ts(mcmc_data[9:9]),100))
-  acf(mcmc_data[9:9])
+  #plot(mcmc_ts, xlab="Iteration", ylab="", main="Time Series")
+  plot(rollmean(ts(mcmc_data[9:9]),100), main="Average")
+  acf(mcmc_data[9:9], main="ACF")
   #print(mean(ts(mcmc_data[9:9])))
-  plot( density(mcmc_ts, adjust = 10), main="Posterior Distribution")
-  #print(mean(ts(mcmc_data[9:9])))
-  #print(sd(ts(mcmc_data[9:9])))
+  plot( density(mcmc_ts, adjust = 4), main="Posterior Distribution", xlim=c(-10, -2))
+  print(mean(ts(mcmc_data[9:9])))
+  print(sd(ts(mcmc_data[9:9])))
 }
 
 
 plotHistogramFromFilename<-function(f)
 {
   mcmc_data = read.table(f)
-  histgramsModes(mcmc_data)
-  mcmcSummary2d(mcmc_data)
+  #histgramsModes(mcmc_data)
+  #mcmcSummary2d(mcmc_data)
   sigmaSummary(mcmc_data)
 }
   
-
+par(mfrow = c(3, 3))
 par(mar=c(4,2,2,4))
 
 list_of_files = list.files(pattern="LFTimeSeries_.*.txt")
