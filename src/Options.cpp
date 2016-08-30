@@ -19,8 +19,8 @@ void Options::default_values()
     _log_start_sigma              = 0.0; 
     _parameter_proposal_diffusion_sigma = 0.1;
     
-    _infer_drift_parameters     = true;
-    _infer_diffusion_parameters = false;
+    _infer_drift_parameters     = false;
+    _infer_diffusion_parameters = true;
     _store_time_series          = true;
     _number_particles           = 100;
 }

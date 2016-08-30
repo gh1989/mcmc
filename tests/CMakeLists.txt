@@ -9,6 +9,8 @@ set_property(TARGET gsl PROPERTY IMPORTED_LOCATION /usr/local/lib/libgsl.a)
 add_library(gslcblas STATIC IMPORTED)
 set_property(TARGET gslcblas PROPERTY IMPORTED_LOCATION /usr/local/lib/libgslcblas.a)
 
+add_executable(TestNumericLimits TestNumericLimits.cpp)
+
 add_executable(TestFourierSeries TestFourierSeries.cpp)
 target_link_libraries(TestFourierSeries FourierSeries)
 

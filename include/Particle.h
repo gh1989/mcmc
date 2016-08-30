@@ -101,11 +101,13 @@ double Particle<BridgeDynamics>::unnormal_weight(size_t tplus1, ParameterType &c
       
     for( size_t k=0; k<K; ++k )
     {
+        
         for(size_t m=1; m<M; ++m)
         {
             log_total += _dynamics.log_path_likelihood( x, c, log_sigma, y, k, tplus1-1, m );
             log_total -= _dynamics.log_bridge_likelihood( x, c, log_sigma, y, k, tplus1-1, m);   
         }
+        
         log_total += _dynamics.log_path_likelihood( x, c, log_sigma, y, k, tplus1, 0 );   
     }        
 

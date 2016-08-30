@@ -190,11 +190,13 @@ double LikelihoodFreeMCMC<Dynamics_>::log_path_likelihood(  PathType &path, Para
         for( size_t l=0; l<L; ++l )
         {
             log_total += _dynamics.log_path_likelihood( path, c_, log_sigma_, observed, k, l, 0 );
+            /* NEVER DO THIS
             if( l < L-1 )
             {
                 for( size_t m=1; m<M; ++m )
                     log_total += _dynamics.log_path_likelihood( path, c_, log_sigma_, observed, k, l, m );
             }
+            */
         }
     return log_total;
 }
