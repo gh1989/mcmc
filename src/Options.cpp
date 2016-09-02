@@ -12,6 +12,7 @@ void Options::default_values()
     _rng_seed               = 0;
     _cutoff                 = 1;
 
+    _single_mode                  = false;
     _parameter_proposal_sigma     = 0.05;
     _observation_noise_sigma      = 0.1;
     _trajectory_path_delta        = 0.001;
@@ -19,7 +20,7 @@ void Options::default_values()
     _log_start_sigma              = 0.0; 
     _parameter_proposal_diffusion_sigma = 0.1;
     
-    _infer_drift_parameters     = false;
+    _infer_drift_parameters     = true;
     _infer_diffusion_parameters = true;
     _store_time_series          = true;
     _number_particles           = 100;
@@ -39,10 +40,14 @@ Options::Options( int argc, char *argv[] )
     default_values();
 
     // Get options from command line.
-    while( ( opt = getopt( argc, argv, ":a:R:K:P:N:B:M:c:o:p:g:l:d:D:i:Q:" ) ) != EOF ) 
+    while( ( opt = getopt( argc, argv, ":Z:a:R:K:P:N:B:M:c:o:p:g:l:d:D:i:Q:" ) ) != EOF ) 
     {
     switch (opt)
         {
+            case 'Z':
+            _cutoff = atoi(optarg);
+            break;
+            
             case 'a':
             _output_subfolder = std::string( optarg );
             std::cout << "set _output_subfolder = " << _output_subfolder << std::endl;

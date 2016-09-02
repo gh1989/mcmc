@@ -86,7 +86,7 @@ public:
     ParameterType& current_drift(){ return c; }
     double current_log_sigma() { return log_sigma; }
     
-    double smc(gsl_rng *r);    
+    long double smc(gsl_rng *r);    
     double log_acceptance_probability();
     
     Options& opts(){ return _opts; }
@@ -127,8 +127,11 @@ private:
     bool    infer_diffusion_parameters;
   
     // SMC/Particle vars
-    double log_marginal_likelihood_c_star;
-    double log_marginal_likelihood_c;
+    long double log_marginal_likelihood_c_star;
+    long double log_marginal_likelihood_c;
+    
+    long double marginal_likelihood_c_star;
+    long double marginal_likelihood_c;
     
     Tensor<double, 2> W;
      
@@ -145,13 +148,27 @@ void ParticleMCMC<Dynamics_>::accept()
 {  
     c = c_star;
     log_sigma = log_sigma_star;
+    
     log_marginal_likelihood_c = log_marginal_likelihood_c_star;
+    marginal_likelihood_c = marginal_likelihood_c_star;
 }
 
 template<class Dynamics_>
 void ParticleMCMC<Dynamics_>::finish() 
 {
-    // experiment options
+    
+    unsigned long int milliseconds_since_epoch = 
+    std::chrono::duration_cast<std::chrono::milliseconds>
+        (std::chrono::system_clock::now().time_since_epoch()).count();
+        
+    std::string filename = "output/";
+    filename += _opts.output_subfolder();
+    filename += "/pMCMCTimeSeries_";
+    filename += Dynamics_::dynamics_string();
+    filename += std::to_string( milliseconds_since_epoch );
+    filename += ".txt";
+    
+    mcmc_file.open(filename);
     _opts.print_header( mcmc_file );
     _dynamics.output_file_timeseries( parameter_chain, log_sigma_chain, mcmc_file );
 }
@@ -176,7 +193,7 @@ void ParticleMCMC<Dynamics_>::generate_observations(gsl_rng *r)
         }   
     }
     
-    log_marginal_likelihood_c = smc(r);
+    marginal_likelihood_c = smc(r);
 }
 
 template<class Dynamics_>
@@ -203,9 +220,11 @@ void ParticleMCMC<Dynamics_>::propose( gsl_rng *r )
 {
     if( infer_drift_parameters )
     {
-        //for( size_t i=0; i<c_dim; ++i)
-        //    c_star(i) = _dynamics.sample_transition_density(r, c(i));
-        c_star(c_dim-1) = _dynamics.sample_transition_density(r, c(c_dim-1));
+        if (_opts.single_mode())
+            c_star(c_dim-1) = _dynamics.sample_transition_density(r, c(c_dim-1));
+        else
+           for( size_t i=0; i<c_dim; ++i) 
+                c_star(i) = _dynamics.sample_transition_density(r, c(i));
     }
     else
         c_star = c;
@@ -217,9 +236,17 @@ void ParticleMCMC<Dynamics_>::propose( gsl_rng *r )
     else
         log_sigma_star = log_sigma;
 
-    log_marginal_likelihood_c_star = smc( r );
+    marginal_likelihood_c_star = smc( r );
+    log_marginal_likelihood_c_star = log( marginal_likelihood_c_star );
+    
+    std::cout << "marginal_likelihood_c_star: " << marginal_likelihood_c_star << std::endl;
+    std::cout << "marginal_likelihood_c: " << marginal_likelihood_c << std::endl;
+    
     std::cout << "log_marginal_likelihood_c_star: " << log_marginal_likelihood_c_star << std::endl;
     std::cout << "log_marginal_likelihood_c: " << log_marginal_likelihood_c << std::endl;
+    
+
+    
 }
 
 template<class Dynamics_>
@@ -264,7 +291,7 @@ void ParticleMCMC<Dynamics_>::store_chain(int n)
 template<class Dynamics_>
 double ParticleMCMC<Dynamics_>::log_acceptance_probability()
 {
-    double log_total = 0;    
+    long double log_total = 0;    
     // Sigma
     if( infer_diffusion_parameters )
     {
@@ -278,18 +305,23 @@ double ParticleMCMC<Dynamics_>::log_acceptance_probability()
         log_total -= _dynamics.log_prior(c); 
     }
     
-    log_total += log_marginal_likelihood_c_star;
-    log_total -= log_marginal_likelihood_c;
+    //log_total += log_marginal_likelihood_c_star;
+    //log_total -= log_marginal_likelihood_c;
+    
+    log_total += log( marginal_likelihood_c_star / marginal_likelihood_c );
     
     return log_total;
     
 }
 
 template<class Dynamics_>
-double ParticleMCMC<Dynamics_>::smc(gsl_rng *r)
+long double ParticleMCMC<Dynamics_>::smc(gsl_rng *r)
 {
+    double sigma = _opts.observation_noise_sigma();
+    double a_constant = 0.5 / (sqrt(2*M_PI)*sigma );
+    double current_mean;
     double total;
-    Tensor<double, 1> phat(L);
+    Tensor<long double, 1> phat(L);
     
     for(size_t i=0; i<num_particles; ++i)     
         particles[i]->setup_starts( r, observed );
@@ -299,12 +331,15 @@ double ParticleMCMC<Dynamics_>::smc(gsl_rng *r)
         
     total = 0;
     for(size_t i=0; i<num_particles; ++i) 
-        total += exp( W(0, i) ); 
-       
-    phat(0) = -log(num_particles);
-    
+        total += a_constant*exp( W(0, i) );   
+    current_mean = total / num_particles;
+          
+    /*
     for(size_t i=0; i<num_particles; ++i)
         phat(0) += W(0, i); 
+    */
+    
+    phat(0) = current_mean;
     
     resample_with_replacement(r, 0);   
     
@@ -323,12 +358,17 @@ double ParticleMCMC<Dynamics_>::smc(gsl_rng *r)
         // Calculate a part of the marginal.
         total = 0;
         for(size_t i=0; i<num_particles; ++i) 
-            total += exp( W(t, i) );
+            total += a_constant*exp( W(t, i) );   
+        current_mean = total / num_particles;
+       
+        phat(t) = phat(t-1)*current_mean;
         
-        phat(t) = phat(t-1) - log(num_particles);
-        
+        /*
         for(size_t i=0; i<num_particles; ++i)
             phat(t) += W(t, i); 
+        */
+        
+        
         
         // Resample the particles based on weights.
         resample_with_replacement(r, t);
@@ -432,18 +472,7 @@ void ParticleMCMC<Dynamics_>::setup_from_options(Options &o)
             particles.push_back( std::make_shared<Particle<Dynamics_>>(o) );
         }
         
-        unsigned long int milliseconds_since_epoch = 
-        std::chrono::duration_cast<std::chrono::milliseconds>
-            (std::chrono::system_clock::now().time_since_epoch()).count();
-            
-        std::string filename = "output/";
-        filename += _opts.output_subfolder();
-        filename += "/pMCMCTimeSeries_";
-        filename += Dynamics_::dynamics_string();
-        filename += std::to_string( milliseconds_since_epoch );
-        filename += ".txt";
-        
-        mcmc_file.open(filename);
+
       
     }
 

@@ -37,6 +37,7 @@ class Options
         bool infer_diffusion_parameters() { return _infer_diffusion_parameters; }
         bool infer_drift_parameters() { return _infer_drift_parameters; }
         bool store_time_series(){return _store_time_series; }
+        bool single_mode(){return _single_mode;}
         
         int rng_seed() const { return _rng_seed; }
         int mcmc_trials() const { return _mcmc_trials; }
@@ -67,8 +68,9 @@ class Options
         void set_observation_noise_sigma( double d ){ _observation_noise_sigma=d; }
         void set_trajectory_path_delta( double d ){ _trajectory_path_delta=d; }
         void set_real_sigma(double d){_real_sigma=d;}
-        void set_infer_diffusion_parameters(bool b){_infer_diffusion_parameters=b;}; 
-        void set_infer_drift_parameters(bool b){_infer_drift_parameters=b;};
+        void set_infer_diffusion_parameters(bool b){_infer_diffusion_parameters=b;}
+        void set_infer_drift_parameters(bool b){_infer_drift_parameters=b;}
+        void set_single_mode(bool b){_single_mode = b;}
     
         void default_values();
         void set_output_subfolder(std::string &s)
@@ -84,6 +86,7 @@ class Options
         bool _infer_diffusion_parameters; 
         bool _infer_drift_parameters;
         bool _store_time_series;
+        bool _single_mode;
         
         int _path_length;
         int _mcmc_trials;

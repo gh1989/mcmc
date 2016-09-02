@@ -6,21 +6,24 @@ library(zoo)
 
 mcmcSummary2d <- function( mcmc_data )
 {
-    par(mfrow = c(4, 2))
-    plot(ts(mcmc_data[7:7]), xlab="Iteration", ylab="")
-    plot(ts(mcmc_data[8:8]), xlab="Iteration", ylab="")
-    plot(rollmean(ts(mcmc_data[7:7]),20), xlab="Iteration", ylab="")
-    plot(rollmean(ts(mcmc_data[8:8]),20), xlab="Iteration", ylab="")
-    acf(mcmc_data[7:7], ylab="")
-    acf(mcmc_data[8:8], ylab="")
+    par(mfrow = c(3, 3))
+    #plot(ts(mcmc_data[7:7]), xlab="Iteration", ylab="")
+    #plot(ts(mcmc_data[8:8]), xlab="Iteration", ylab="")
+    plot(rollmean(ts(mcmc_data[7:7]),20), xlab="Iteration", ylab="", main="Average Re(c)")
+    plot(rollmean(ts(mcmc_data[8:8]),20), xlab="Iteration", ylab="", main="Average Im(c)")
+    plot(rollmean(ts(mcmc_data[8:8]),20), xlab="Iteration", ylab="", main="Average log diffusion")
+    acf(mcmc_data[7:7], main="ACF")
+    acf(mcmc_data[8:8], main="ACF")
+    acf(mcmc_data[9:9], main="ACF")
     plot( density(ts(mcmc_data[7:7])), main="Posterior Distribution", xlab="Re(c)", xlim=c(0.35,0.60))
     plot( density(ts(mcmc_data[8:8])), main="Posterior Distribution", xlab="Im(c)", xlim=c(-0.35,-0.60))
-    
+    plot( density(ts(mcmc_data[9:9]), adjust = 4), main="Posterior Distribution", xlab="log diffusion", xlim=c(-10, -2))
     print(mean(ts(mcmc_data[7:7])))
     print(sd(ts(mcmc_data[7:7])))  
-    
     print(mean(ts(mcmc_data[8:8])))
     print(sd(ts(mcmc_data[8:8]))) 
+    print(mean(ts(mcmc_data[9:9])))
+    print(sd(ts(mcmc_data[9:9]))) 
 }
 
 histgramsModes<-function( mcmc_data )
@@ -51,8 +54,8 @@ plotHistogramFromFilename<-function(f)
 {
   mcmc_data = read.table(f)
   #histgramsModes(mcmc_data)
-  #mcmcSummary2d(mcmc_data)
-  sigmaSummary(mcmc_data)
+  mcmcSummary2d(mcmc_data)
+  #sigmaSummary(mcmc_data)
 }
   
 par(mfrow = c(3, 3))

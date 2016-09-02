@@ -111,8 +111,42 @@ class LangevinDynamics : public DynamicsBase {
             for(size_t i=0; i<D; ++i)
                 real_c(i) = ComplexType(0, 0);
             
-            if (o.infer_drift_parameters())
+            // If we are not inferring the drift then turn off potential as a preference.
+            bool have_a_potential = o.infer_drift_parameters();
+            bool single_mode = o.single_mode();
+            if (have_a_potential)
+            {
+                
                 real_c(D-1) = ComplexType(0.5, -0.5);
+            
+                /*
+                * Hard code some params here...
+                *
+                *
+                */
+            
+                if ( (M >= 1) && (!single_mode) )
+                {
+                    real_c(0) = ComplexType(0.5, -0.5);
+                    real_c(1) = ComplexType(0.25, 0.5);
+                    real_c(2) = ComplexType(1.0,1.0);
+                    real_c(3) = ComplexType(-1.0,-5.0);
+                }
+            
+                if ( (M >= 2) && (!single_mode) )
+                {
+                    real_c(4) = ComplexType(0.5, -0.5);
+                    real_c(5) = ComplexType(0.5, -0.5);
+                    real_c(6) = ComplexType(5.0,1.0);
+                    real_c(7) = ComplexType(5.0,1.0);
+                    real_c(8) = ComplexType(0.5, -0.5);
+                    real_c(9) = ComplexType(0.5, -0.5);
+                    real_c(10) = ComplexType(5.0,1.0);
+                    real_c(11) = ComplexType(5.0,1.0);
+                }
+                
+            }
+            
             return real_c;
         }
         
