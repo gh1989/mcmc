@@ -218,23 +218,11 @@ void ParticleMCMC<Dynamics_>::generate_true_trajectory(gsl_rng *r)
 template<class Dynamics_>
 void ParticleMCMC<Dynamics_>::propose( gsl_rng *r )
 {
-    if( infer_drift_parameters )
-    {
-        if (_opts.single_mode())
-            c_star(c_dim-1) = _dynamics.sample_transition_density(r, c(c_dim-1));
-        else
-           for( size_t i=0; i<c_dim; ++i) 
-                c_star(i) = _dynamics.sample_transition_density(r, c(i));
-    }
-    else
-        c_star = c;
-    
     double log_sigma_proposal_standard_deviation = _opts.parameter_proposal_diffusion_sigma();
-    
-    if( infer_diffusion_parameters )
-        log_sigma_star = gsl_ran_gaussian(r, log_sigma_proposal_standard_deviation ) + log_sigma;
-    else
-        log_sigma_star = log_sigma;
+    c_star = infer_drift_parameters ? _dynamics.sample_transition_density(r, c) : c;    
+    log_sigma_star = infer_diffusion_parameters ? (gsl_ran_gaussian(r, log_sigma_proposal_standard_deviation ) + log_sigma) : log_sigma;
+    setup_observed_starts( r, observed, x_star );
+    trajectory( r, c_star, log_sigma_star, x_star );
 
     marginal_likelihood_c_star = smc( r );
     log_marginal_likelihood_c_star = log( marginal_likelihood_c_star );
@@ -242,11 +230,10 @@ void ParticleMCMC<Dynamics_>::propose( gsl_rng *r )
     std::cout << "marginal_likelihood_c_star: " << marginal_likelihood_c_star << std::endl;
     std::cout << "marginal_likelihood_c: " << marginal_likelihood_c << std::endl;
     
-    std::cout << "log_marginal_likelihood_c_star: " << log_marginal_likelihood_c_star << std::endl;
-    std::cout << "log_marginal_likelihood_c: " << log_marginal_likelihood_c << std::endl;
-    
-
-    
+    // FYI...
+    //std::cout << "log_marginal_likelihood_c_star: " << log_marginal_likelihood_c_star << std::endl;
+    //std::cout << "log_marginal_likelihood_c: " << log_marginal_likelihood_c << std::endl;
+       
 }
 
 template<class Dynamics_>

@@ -9,7 +9,7 @@
 /* No diffusion constant inference:
 ./bin/LFLangevin -K 25 -N 10000 -o 0.0002 -p 0.01 -c 0.001 -l -6.8
 
-./bin/Pmcmc -Q 25 -N 100000 -K 20 -M 4 -P 10 -o 0.03 p 0.0001 -c 0.05 -i 0 -B 0
+./bin/Pmcmc -Q 25 -N 10000 -K 20 -M 4 -P 10 -o 0.03 -p 0.0001 -c 0.05 -i 0 -B 0
 
 */
 

@@ -28,10 +28,7 @@ void FourierSeries::set_mode( int i, int j, ComplexType mode)
 void FourierSeries::set_modes( Tensor<ComplexType, 1> &c )
 {
     int idx;
-
-    int ii;
-    int jj; 
-   
+  
     for( size_t i=1; i<M+1; ++i )
         set_mode( i, 0, c(i-1) );
 

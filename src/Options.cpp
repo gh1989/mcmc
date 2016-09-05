@@ -40,10 +40,14 @@ Options::Options( int argc, char *argv[] )
     default_values();
 
     // Get options from command line.
-    while( ( opt = getopt( argc, argv, ":Z:a:R:K:P:N:B:M:c:o:p:g:l:d:D:i:Q:" ) ) != EOF ) 
+    while( ( opt = getopt( argc, argv, ":Z:a:R:K:P:N:B:M:c:o:p:g:l:d:D:i:Q:S:" ) ) != EOF ) 
     {
     switch (opt)
         {
+            case 'S':
+            _single_mode = atoi(optarg);
+            break;
+            
             case 'Z':
             _cutoff = atoi(optarg);
             break;

@@ -56,7 +56,7 @@ class OUDynamics : public DynamicsBase
         double log_prior(ParameterType &c);
         double log_path_likelihood( PathType &x, ParameterType &c, double log_sigma, CoarsePathType &y, int k, int l, int m );
         double sample_transition_density(gsl_rng *r, double c );
-        
+        ParameterType& sample_transition_density(gsl_rng *r, ParameterType& C);
         static std::string dynamics_string()
         {
             return "OU_";

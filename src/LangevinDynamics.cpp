@@ -14,22 +14,89 @@ ComplexType LangevinDynamics::sample_transition_density(gsl_rng *r, ComplexType 
     return ComplexType(random_real_part, random_imag_part) + c;
 }
 
+LangevinDynamics::ParameterType LangevinDynamics::sample_transition_density(gsl_rng *r, ParameterType& C)
+{
+    double proposal_sigma = _opts.parameter_proposal_sigma();
+    bool single_mode = _opts.single_mode();
+    size_t c_dim = parameter_dimension(_opts);
+    ParameterType C_star(c_dim);
+    for(size_t i=0; i<c_dim; ++i) C_star(i) = 0.0;
+    int M = _opts.cutoff();
+
+    int idx;
+    
+    double eigenvalue_power;
+    if ((M==1)&&(single_mode))
+    {
+        eigenvalue_power = 2*M_PI*sqrt(2);
+        C_star(c_dim-1) = ComplexType(  gsl_ran_gaussian(r, proposal_sigma*pow(eigenvalue_power, -1.0) ), 
+                                        gsl_ran_gaussian(r, proposal_sigma*pow(eigenvalue_power, -1.0) ) ) + C(c_dim-1); 
+    }
+    else
+    {
+        for( size_t i=1; i<M+1; ++i )
+        {
+            eigenvalue_power = 2*M_PI*(i);
+            C_star(i-1) = ComplexType( gsl_ran_gaussian(r, proposal_sigma*pow(eigenvalue_power, -1.0) ), 
+                                       gsl_ran_gaussian(r, proposal_sigma*pow(eigenvalue_power, -1.0) ) ) + C(i-1); 
+        }
+
+        for( int i=-M; i<M+1; ++i )
+            for( size_t j=1; j<M+1; ++j )
+            { 
+                idx = M + (j-1)*(2*M+1) + (i+M);
+                eigenvalue_power = 2*M_PI*sqrt(i*i + j*j);
+                C_star(idx) = ComplexType( gsl_ran_gaussian(r, proposal_sigma*pow(eigenvalue_power, -1.0) ), 
+                                           gsl_ran_gaussian(r, proposal_sigma*pow(eigenvalue_power, -1.0) ) ) + C(idx); 
+            }
+    }
+    
+    return C_star;
+}
+
 double LangevinDynamics::log_transition(ParameterType &c_star, ParameterType &c)
 {
     return 0;
 }
 
+// Gaussian prior: TODO: create a prior base class and have guassian prior,
+// have pointer to prior on this object.
 double LangevinDynamics::log_prior(ParameterType &c)
 {
-    // Changed for one parameter model.
-    double log_total = 0;
+    bool single_mode = _opts.single_mode();
     double parameter_sigma = _opts.parameter_proposal_sigma();
-    double exponential_constant = 0.5 / (parameter_sigma * parameter_sigma);
-    int c_dim = parameter_dimension();
 
-    //for( size_t i=0; i<c_dim; ++i)
-    log_total -= exponential_constant*( pow( std::abs(c(c_dim-1)), 2) );
+    double exponential_constant;
+    double variance;
+    int    c_dim = parameter_dimension();
+    int    M = _opts.cutoff();
+    int    idx;
+    double log_total = 0;
+    // For when we want to infer one fourier mode, the cutoff is M=1
+    // which defines 4 modes, but we only want one.
+    if((M==1)&&(single_mode))
+    {
+        // Single mode M=1, final mode is k = (1,1), k^2 = 2.
+        variance = pow(4*M_PI*M_PI*2, -1)*parameter_sigma*parameter_sigma;
+        log_total -= (0.5/variance)*( pow( std::abs(c(c_dim-1)), 2) );
+        return log_total;
+    }
+    else
+    {
+        for( size_t i=1; i<M+1; ++i )
+        {
+            variance = pow(4*M_PI*M_PI*(i*i), -1)*parameter_sigma*parameter_sigma;
+            log_total -= (0.5/variance)*pow( std::abs( c(i-1) ), 2); 
+        }
 
+        for( int i=-M; i<M+1; ++i )
+        for( size_t j=1; j<M+1; ++j )
+        { 
+            idx = M + (j-1)*(2*M+1) + (i+M);
+            variance = pow(4*M_PI*M_PI*(i*i + j*j), -1)*parameter_sigma*parameter_sigma;
+            log_total -= (0.5/variance)*pow( std::abs( c(idx) ), 2); 
+        }
+    }
     return log_total;
 }
 

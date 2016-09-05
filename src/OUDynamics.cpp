@@ -11,6 +11,14 @@ double OUDynamics::sample_transition_density(gsl_rng *r, double c )
     return gsl_ran_gaussian(r, sigma ) + c;
 }
 
+OUDynamics::ParameterType& OUDynamics::sample_transition_density(gsl_rng *r, ParameterType& C)
+{
+    ParameterType C_star(1);
+    double sigma = _opts.parameter_proposal_sigma();
+    C_star(0) =  gsl_ran_gaussian(r, sigma ) + C(0);
+    return C_star;
+}
+
 double OUDynamics::log_transition(ParameterType &c_star, ParameterType &c)
 {
     // Symmetric

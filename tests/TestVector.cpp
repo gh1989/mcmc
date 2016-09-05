@@ -108,12 +108,11 @@ int main( int argc, char *argv[] )
 
     for(size_t i=0; i<num_particles; ++i) 
         total += exp( W(0, i) ); 
-    
-    phat(0) = -log(num_particles);
+
     
     for(size_t i=0; i<num_particles; ++i)
-        phat(0) +=  particles[i]->unnormal_weight(0, c, log_sigma, observed);
-    
+        phat(0) += a_constant*exp( particles[i]->unnormal_weight(0, c, log_sigma, observed) );
+    phat(0) *= 1.0/num_particles;
     unsigned int resample_particle_index;
     double p[num_particles];
     
@@ -133,6 +132,9 @@ int main( int argc, char *argv[] )
         std::cout << p[i] <<" against "<< p[resample_particle_index] <<std::endl;
     }
 
+    double sigma = _opts.observation_noise_sigma();
+    double a_constant = 0.5 / (sqrt(2*M_PI)*sigma );
+    
     for(size_t t=1; t<L; ++t)  
     {   
         for(size_t i=0; i<num_particles; ++i)
@@ -169,7 +171,13 @@ int main( int argc, char *argv[] )
         std::cout<<"total:" << total << std::endl;
         std::cout<<"(1.0/num_particles):" << (1.0/num_particles) << std::endl;
         std::cout<<"phat(t-1)"<< "with t-1=" << t-1 << " = " << phat(t-1) << std::endl; 
-        phat(t) = phat(t-1) - log(num_particles);
+        
+        total = 0;
+        for(size_t i=0; i<num_particles; ++i) 
+            total += a_constant*exp( W(0, i) );   
+        current_mean = total / num_particles;
+        
+        phat(t) = phat(t-1)*current_mean;
         
         for(size_t i=0; i<num_particles ; ++i)
             phat(t) += W(t, i);
