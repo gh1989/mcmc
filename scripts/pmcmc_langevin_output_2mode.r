@@ -54,8 +54,8 @@ plotHistogramFromFilename<-function(f)
 {
   mcmc_data = read.table(f)
   #histgramsModes(mcmc_data)
-  mcmcSummary2d(mcmc_data)
-  #sigmaSummary(mcmc_data)
+  #mcmcSummary2d(mcmc_data)
+  sigmaSummary(mcmc_data)
 }
 
 par(mfrow = c(3, 3))

@@ -2,7 +2,7 @@
 # PLOTS         #
 #################
 mcmc_trials = 100000
-setwd(sprintf("C:/cygwin64/home/Gregg/mcmc/output/LFMCMC/%s/100k",tune_variable))
+setwd(sprintf("C:/cygwin64/home/Gregg/mcmc/output/LFMCMC/%s/4modes",tune_variable))
 
 ###################################
 # Standard deviation              #
@@ -35,7 +35,7 @@ for(i in 1:len)
 ylim <- c( min(real_var,imag_var), max(real_var, imag_var) )
 plot(var_x, real_var, log=log_xy, xlab=nice_name, ylab="Posterior Variance", main="Posterior Var.", pch=2, col="red", ylim=ylim)
 points(var_x, imag_var, log=log_xy, main="Im", pch=5, col="blue")
-legend('topright',c("Re","Im"), lty=1, xpd=TRUE, inset=c(-0.5,0), col=c('red', 'blue'), bty='n', cex=.75, pch=c(2,5))
+legend('topright',c("Re","Im"), lty=1, xpd=TRUE, inset=c(-0.25,0), col=c('red', 'blue'), bty='n', cex=.75, pch=c(2,5))
 
 ###################################
 # ESS                             #
@@ -44,7 +44,7 @@ ylim <- c( min(real_ess,imag_ess), max(real_ess, imag_ess) )
 plot(var_x, real_ess, log=log_xy, xlab=nice_name, ylab="ESS", pch=2, col="red", ylim=ylim, main="ESS")
 points(var_x, imag_ess, log=log_xy, main="Im", pch=5, col="blue")
 
-legend('topright',c("Re","Im"), lty=1, xpd=TRUE, inset=c(-0.5,0), col=c('red', 'blue'), bty='n', cex=.75, pch=c(2,5))
+legend('topright',c("Re","Im"), lty=1, xpd=TRUE, inset=c(-0.25,0), col=c('red', 'blue'), bty='n', cex=.75, pch=c(2,5))
 
 ###################################
 # Real part posterior for given K #
@@ -72,8 +72,7 @@ for(i in 1:length(density_plots) )
   vals[i+1] = as.numeric( gsub("[^0-9.]", "", meta_data_string) )
   print(vals[i+1])
 }
-legend('topright',as.character(vals), bty='n', xpd=TRUE, inset=c(-0.4,0),
-       cex=.75, lty=c(1, 2, 3) )
+legend('topright',as.character(vals), bty='n', xpd=TRUE, inset=c(-0.25,0), cex=.75, lty=c(1, 2, 3) )
 
 ###################################
 # Imag part posterior for given K #
@@ -101,7 +100,7 @@ for(i in 1:length(density_plots) )
   vals[i+1] = as.numeric( gsub("[^0-9.]", "", meta_data_string) )
   print(vals[i+1])
 }
-legend('topright',as.character(vals), bty='n', cex=.75, lty=c(1, 2, 3), xpd=TRUE, inset=c(-0.4,0))
+legend('topright',as.character(vals), bty='n', cex=.75, lty=c(1, 2, 3), xpd=TRUE, inset=c(-0.25,0))
 
 
 #mtext("Path Length", outer=TRUE, cex=1.5)

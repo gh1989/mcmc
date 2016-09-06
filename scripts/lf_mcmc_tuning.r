@@ -12,7 +12,7 @@ nice_name = "Parallel Paths"
 log_xy = 'xy'
 source("C:/cygwin64/home/Gregg/mcmc/scripts/lf_mcmc_tuning_o.r")
 
-first_plot = 6
+first_plot = 4
 density_plots = c(2,3)
 ptys=c(2,3)
 tune_variable = "path_length"
@@ -20,16 +20,16 @@ nice_name = "Path Length"
 log_xy = 'xy'
 source("C:/cygwin64/home/Gregg/mcmc/scripts/lf_mcmc_tuning_o.r")
 
-first_plot = 1
-density_plots = c(2,3)
+first_plot = 4
+density_plots = c(5,6)
 ptys=c(2,3,4,5)
 tune_variable = "extra_data_ratio"
 nice_name = "Steps Per Observations"
 log_xy = 'xy'
 source("C:/cygwin64/home/Gregg/mcmc/scripts/lf_mcmc_tuning_o.r")
 
-first_plot = 1
-density_plots = c(2,3)
+first_plot = 4
+density_plots = c(3,2)
 ptys=c(2,3)
 tune_variable = "observation_noise_sigma"
 nice_name = "Observation Noise"
