@@ -1,6 +1,8 @@
 #ifndef PARTICLE_H
 #define PARTICLE_H
 
+#include <cmath> 
+
 #include "BridgeDynamics.h"
 
 using namespace MCMC;
@@ -89,29 +91,56 @@ template<class Dynamics_>
 double Particle<Dynamics_>::unnormal_weight(size_t t, ParameterType &c, double sigma, CoarsePathType &y)
 {   
     double log_total = 0;
-    for( size_t k=0; k<K; ++k )
-        log_total += _dynamics.log_path_likelihood( x, c, sigma, y, k, t, 0 );
+    for( size_t k=0; k<K; ++k ) // p( y | x, c )
+        log_total += _dynamics.log_p( y, x, c, sigma, k, t );
     return log_total;
 }
 
 template<>
-double Particle<BridgeDynamics>::unnormal_weight(size_t tplus1, ParameterType &c, double log_sigma, CoarsePathType &y)
+double Particle<BridgeDynamics>::unnormal_weight(size_t t, ParameterType &c, double log_sigma, CoarsePathType &y)
 {   
     double log_total = 0;
-      
+    double temp = 0; 
     for( size_t k=0; k<K; ++k )
     {
-        
-        for(size_t m=1; m<M; ++m)
+        /*
+        for(size_t m=1; m<M+1; ++m)
         {
-            log_total += _dynamics.log_path_likelihood( x, c, log_sigma, y, k, tplus1-1, m );
-            log_total -= _dynamics.log_bridge_likelihood( x, c, log_sigma, y, k, tplus1-1, m);   
-        }
+            // \hat{p}( x(n + dt) ... x(n+1) | y(n+1), x(n), c )
+            temp = _dynamics.log_path_likelihood( x, c, log_sigma, y, k, t-1, m );
+            std::cout << "numerator: " << temp << std::endl;
+            log_total += temp;
+            
+            // \hat{p}( x(n + dt) ... x(n+1) | y(n+1), x(n), c )
+            temp = _dynamics.log_bridge_likelihood( x, c, log_sigma, y, k, t-1, m ); 
+            std::cout << "denominator: " <<temp << std::endl;
+            log_total -= temp;
+        } 
+        */
+        // p( y | x, c )
+        // log_total += _dynamics.log_path_likelihood( x, c, log_sigma, y, k, t, 0 );
         
-        log_total += _dynamics.log_path_likelihood( x, c, log_sigma, y, k, tplus1, 0 );   
+        // p( y | x, c )
+        temp= _dynamics.log_p( y, x, c, log_sigma, k, t );        
+        if (std::isnan(temp))
+        {
+            std::cout<< "WARNING! temp is nan?!" << std::endl;
+            if(k!=0)
+                std::cout<< "k is not zero: " << k << std::endl;       
+        }
+        log_sigma += temp;
     }        
 
-    //std::cout<<"Particle<BridgeDynamics>::unnormal_weight log_total:" << log_total << std::endl;
+    std::cout<<"Particle<BridgeDynamics>::unnormal_weight log_total:" << log_total << std::endl;
+    
+    if (std::isnan(log_total))
+    {
+        std::cout<< "WARNING! log_total is nan?!" << std::endl;
+        std::cout<< "t" << t << std::endl;
+        std::cout<< "y" << y << std::endl;
+        std::cout<< "c" << c << std::endl;
+        std::cout<< "log_sigma" << log_sigma << std::endl;        
+    }
     
     return log_total;
 }
@@ -126,17 +155,31 @@ void Particle<Dynamics_>::setup_starts(gsl_rng *r, CoarsePathType &y)
     }
 }
 
-template<class Dynamics_>
-void Particle<Dynamics_>::forward_sim(gsl_rng *r, ParameterType &c, double sigma, CoarsePathType &y, size_t tplus1 )
+template<>
+void Particle<BridgeDynamics>::forward_sim(gsl_rng *r, ParameterType &c, double sigma, CoarsePathType &y, size_t l )
 {
     /*
-    Forward simulate from (t,t+1]
+    Forward simulate from (l-1,l]
     */    
     for( size_t k=0; k<K; ++k )
     {
         for( size_t m=1; m<M; ++m )
-            _dynamics.forward_sim(r, c, sigma, y, k, tplus1-1, m, x);   
-        _dynamics.forward_sim(r, c, sigma, y, k, tplus1, 0, x);
+            _dynamics.forward_sim(r, c, sigma, y, k, l-1, m, x);   
+        _dynamics.forward_sim(r, c, sigma, y, k, l-1, M, x);
+    }  
+}
+
+template<class Dynamics_>
+void Particle<Dynamics_>::forward_sim(gsl_rng *r, ParameterType &c, double sigma, CoarsePathType &y, size_t l )
+{
+    /*
+    Forward simulate from (l-1,l]
+    */    
+    for( size_t k=0; k<K; ++k )
+    {
+        for( size_t m=1; m<M; ++m )
+            _dynamics.forward_sim(r, c, sigma, y, k, l-1, m, x);   
+        _dynamics.forward_sim(r, c, sigma, y, k, l-1, M, x);
     }  
 }
 

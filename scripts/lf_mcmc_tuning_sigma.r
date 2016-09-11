@@ -27,13 +27,19 @@ for(i in 1:len)
 }
 
 ylim <- c( min(real_var), max(real_var) )
+
 plot(var_x, real_var, log=log_xy, xlab=nice_name, ylab="Posterior Variance", main="Posterior Var.", pch=2, col="red", ylim=ylim)
+smoothingSpline = smooth.spline(real_var~var_x, spar=0.4)
+lines(smoothingSpline, col="red")
 
 ###################################
 # ESS                             #
 ###################################
 ylim <- c( min(real_ess), max(real_ess) )
 plot(var_x, real_ess, log=log_xy, xlab=nice_name, ylab="ESS", pch=2, col="red", ylim=ylim, main="ESS")
+
+smoothingSpline = smooth.spline(real_ess~var_x, spar=0.4)
+lines(smoothingSpline, col="red")
 
 ###################################
 # Real part posterior for given K #
@@ -48,7 +54,8 @@ meta_data_string <- grep( pattern=tune_variable, x, value=TRUE)
 vals[1] = as.numeric( gsub("[^0-9.]", "", meta_data_string) )
 print(vals[1])
 real_parts = mcmc_data[9:9]
-plot(density(ts(real_parts)), pty=1, main="Posterior" )
+plot(density(ts(real_parts)), pty=1, main="Posterior", xlim=c(-8.0, -5.0) )
+abline(v=-6.9, lty=12, col="red")
 
 for(i in 1:length(density_plots) )
 {  

@@ -9,7 +9,7 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/${EXT_PROJECTS_DIR}/bin)
 ## Compiler flags
 if(CMAKE_COMPILER_IS_GNUCXX)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O2")        ## Optimize
-    set(CMAKE_EXE_LINKER_FLAGS "-s")  ## Strip binary
+    set(CMAKE_EXE_LINKER_FLAGS "-s")                     ## Strip binary
 endif()
 
 add_library(fftw3 STATIC IMPORTED)
@@ -28,11 +28,26 @@ target_link_libraries( LFOrnsteinUhlenbeck gsl gslcblas LikelihoodFreeMCMC Optio
 add_executable(LFLangevin LFLangevin.cpp)
 target_link_libraries( LFLangevin gsl gslcblas LikelihoodFreeMCMC Options LangevinDynamics FourierSeries)
 
+add_executable(LFCurved LFCurved.cpp)
+target_link_libraries( LFCurved gsl gslcblas LikelihoodFreeMCMC Options CurvedSurfaceDynamics FourierSeries)
+
 add_executable(Endpoints Endpoints.cpp)
 target_link_libraries(Endpoints LangevinDynamics FourierSeries BridgeDynamics gsl gslcblas Options)
 
+add_executable(SMCRuns SMCRuns.cpp)
+target_link_libraries(SMCRuns gsl gslcblas Options LangevinDynamics BridgeDynamics FourierSeries)
+
+add_executable(SMCRunsCurved SMCRunsCurved.cpp)
+target_link_libraries(SMCRunsCurved gsl gslcblas Options CurvedSurfaceDynamics BridgeDynamics FourierSeries)
+
+add_executable(SMCBridgeRuns SMCBridgeRuns.cpp)
+target_link_libraries(SMCBridgeRuns gsl gslcblas Options LangevinDynamics BridgeDynamics FourierSeries)
+
 add_executable(PMCMC ParticleMCMC.cpp)
 target_link_libraries( PMCMC gsl gslcblas Options LangevinDynamics BridgeDynamics FourierSeries)
+
+add_executable(PMCMCCurved PMCMCCurved.cpp)
+target_link_libraries( PMCMCCurved gsl gslcblas Options CurvedSurfaceDynamics BridgeDynamics FourierSeries)
 
 add_executable(SMC SMC.cpp)
 target_link_libraries( SMC gsl gslcblas Options LangevinDynamics BridgeDynamics FourierSeries)

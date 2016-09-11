@@ -46,7 +46,6 @@ int main( int argc, char *argv[] )
        
     Particle<BridgeDynamics>::CoarsePathType observed(K, L, 2);
     Particle<BridgeDynamics>::PathType real(K,L,M,2);
-    
    
     double log_sigma = o.log_real_sigma();
     
@@ -94,6 +93,7 @@ int main( int argc, char *argv[] )
     std::cout << observed;
 
     Tensor<double, 2> W(L,num_particles);
+    Tensor<double, 2> resampled_W(L,num_particles);
     double total = 0;
 
     for(size_t i=0; i<num_particles; ++i)
@@ -110,14 +110,12 @@ int main( int argc, char *argv[] )
     for(size_t i=0; i<num_particles; ++i) 
         total += exp( W(0, i) ); 
     
-    phat(0) = -log(num_particles);
+    double sigma = o.observation_noise_sigma();
+    double a_constant = 0.5 / (sqrt(2*M_PI)*sigma );
     
     for(size_t i=0; i<num_particles; ++i)
-    {
-        // Always 0.
-        phat(0) += particles[i]->unnormal_weight(0, c, log_sigma, observed);
-    }
-
+        phat(0) += a_constant*exp( particles[i]->unnormal_weight(0, c, log_sigma, observed) );
+    phat(0) *= 1.0/num_particles;
     unsigned int resample_particle_index;
     double p[num_particles];
     
@@ -128,60 +126,50 @@ int main( int argc, char *argv[] )
     g = gsl_ran_discrete_preproc(num_particles, p);
     
     resampled = particles;
-    
+    resampled_W = W;
     for( size_t i=0; i<num_particles; ++i )
     {
         resample_particle_index = gsl_ran_discrete(r, g);
         particles[i] = resampled[resample_particle_index];
+        W(0,i) = resampled_W(0, resample_particle_index);
         std::cout << "Swapping particle " << i << " for particle " << resample_particle_index << std::endl;   
         std::cout << p[i] <<" against "<< p[resample_particle_index] <<std::endl;
     }
 
-    for(size_t t=0; t<L-1; ++t)  
+    for(size_t l=1; l<L; ++l)  
     {   
         for(size_t i=0; i<num_particles; ++i)
         {  
-            particles[i]->forward_sim(r, c, log_sigma, observed, t+1); // From [t, t+1)
-            W(t+1,i) = particles[i]->unnormal_weight(t+1, c, log_sigma, observed);
+            particles[i]->forward_sim(r, c, log_sigma, observed, l); // From [t, t+1)
+            W(l,i) = particles[i]->unnormal_weight(l, c, log_sigma, observed);
         } 
         
         // Calculate a part of the marginal.
         total = 0;
         for(size_t i=0; i<num_particles; ++i) 
         {
-            std::cout<< "W(" << t+1 <<"," << i << ")" << " = " << W(t+1,i) << std::endl;
-            std::cout<< "exp( W(" << t+1 <<"," << i << "))" << " = " << exp(W(t+1,i)) << std::endl;
-            total += exp( W(t+1, i) );
+            std::cout<< "W(" << l<<"," << i << ")" << " = " << W(l,i) << std::endl;
+            std::cout<< "exp( W(" << l <<"," << i << "))" << " = " << exp(W(l,i)) << std::endl;
+            total += exp( W(l, i) );
         }
         
         resampled = particles;
        
-        std::cout<< "total: " << total << std::endl;
-       
         for( size_t i=0; i<num_particles; ++i )
-        {
-            p[i] = exp( W(t+1, i) ) / total;
-            
-            std::cout << "prob" << i << p[i] << std::endl;
-        }
+            p[i] = exp( W(l, i) ) / total;
+
         gsl_ran_discrete_t *g;
         g = gsl_ran_discrete_preproc(num_particles, p);
         
+        resampled_W = W;
         for( size_t i=0; i<num_particles; ++i )
         {
             resample_particle_index = gsl_ran_discrete(r, g);
             particles[i] = resampled[resample_particle_index];
+            W(l,i) = resampled_W(l, resample_particle_index);
             std::cout << "Swapping particle " << i << " for particle " << resample_particle_index << std::endl;   
             std::cout << p[i] <<" against "<< p[resample_particle_index] <<std::endl;
         }
-        
-        std::cout<<"total:" << total << std::endl;
-        std::cout<<"(1.0/num_particles):" << (1.0/num_particles) << std::endl;
-        std::cout<<"phat(t)"<< "with t-1=" << t << " = " << phat(t) << std::endl; 
-        phat(t+1) = phat(t) - log(num_particles);
-        
-        for(size_t i=0; i<num_particles ; ++i)
-            phat(t+1) += W(t+1, i);
     }
     
     std::cout<<"log_marginal "<< phat(L-1) << std::endl;
@@ -205,7 +193,6 @@ int main( int argc, char *argv[] )
             p[i] *= exp( W(t, i) ) / total;
     }
     
-
     /*
      * File output.
      */
@@ -228,7 +215,7 @@ int main( int argc, char *argv[] )
         
         // Fill to t+1
         if(l<L-1)
-        for(size_t m=0; m<M; ++m)
+        for(size_t m=1; m<M; ++m)
         {
             for(size_t k=0; k<K; ++k)
                 for(size_t i=0; i<num_particles; i++)

@@ -102,7 +102,7 @@ class LangevinDynamics : public DynamicsBase {
         double log_prior(ParameterType &c);
         double log_transition(ParameterType &c_star, ParameterType &c);
         double log_path_likelihood( PathType &x, ParameterType &c, double sigma, CoarsePathType &y, int k, int l, int m );
-
+        double log_p( CoarsePathType &y,  PathType &x, ParameterType &c, double log_sigma, int k, int l);
         static ParameterType default_parameters( Options& o )
         {
             int M;
@@ -131,13 +131,13 @@ class LangevinDynamics : public DynamicsBase {
                 if ( (M >= 2) && (!single_mode) )
                 {
                     real_c(4) = ComplexType(0.5,   -0.5);
-                    real_c(5) = ComplexType(0.5,   -0.5);
-                    real_c(6) = ComplexType(0.25,    1.0);
-                    real_c(7) = ComplexType(0.15,    1.0);
-                    real_c(8) = ComplexType(0.5,   -0.5);
-                    real_c(9) = ComplexType(0.5,   -0.5);
-                    real_c(10) = ComplexType(0.7,   0.2);
-                    real_c(11) = ComplexType(0.2,   0.7);
+                    real_c(5) = ComplexType(0.05,   -0.05);
+                    real_c(6) = ComplexType(0.25,    0.25);
+                    real_c(7) = ComplexType(0.15,    0.15);
+                    real_c(8) = ComplexType(0.05,   -0.05);
+                    real_c(9) = ComplexType(0.06,   -0.005);
+                    real_c(10) = ComplexType(0.0075,   0.001);
+                    real_c(11) = ComplexType(0.0025,   0.05);
                 }
                 
             }

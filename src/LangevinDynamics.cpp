@@ -6,6 +6,21 @@
 
 using namespace std;
 
+double LangevinDynamics::log_p( CoarsePathType &y,  PathType &x, ParameterType &c, double log_sigma, int k, int l)
+{
+    
+    double obs_sigma =  _opts.observation_noise_sigma();
+    double exponential_constant_obs  = 0.5 / ( pow( 2*M_PI*obs_sigma*obs_sigma, 1.5 ) );
+   
+    double log_total = 0;
+
+    log_total -= exponential_constant_obs * pow( x(k, l, 0, 0 ) - y(k, l, 0), 2);
+    log_total -= exponential_constant_obs * pow( x(k, l, 0, 1 ) - y(k, l, 1), 2);
+    
+    return log_total;
+}
+
+
 ComplexType LangevinDynamics::sample_transition_density(gsl_rng *r, ComplexType c )
 {
     double proposal_sigma = _opts.parameter_proposal_sigma();
@@ -140,7 +155,7 @@ void LangevinDynamics::forward_sim( gsl_rng *r, ParameterType &c, double log_sig
     int    M = _opts.extra_data_ratio();
     double dt = _opts.trajectory_path_delta();
     double root_2dt = sqrt(2.0*dt);
-    
+        
     FourierSeries V(_cutoff);
     V.set_modes(c);
             
@@ -154,8 +169,16 @@ void LangevinDynamics::forward_sim( gsl_rng *r, ParameterType &c, double log_sig
 
     gradtminus1 = V.grad( xtminus1 );
  
-    out(k, l, m, 0 ) = xtminus1(0)-gradtminus1(0)*dt + root_2dt*gsl_ran_gaussian(r, exp( log_sigma ));
-    out(k, l, m, 1 ) = xtminus1(1)-gradtminus1(1)*dt + root_2dt*gsl_ran_gaussian(r, exp( log_sigma ));  
+    if(m!=M)
+    {
+        out(k, l, m, 0 ) = xtminus1(0)-gradtminus1(0)*dt + root_2dt*gsl_ran_gaussian(r, exp( log_sigma ));
+        out(k, l, m, 1 ) = xtminus1(1)-gradtminus1(1)*dt + root_2dt*gsl_ran_gaussian(r, exp( log_sigma ));  
+    }
+    else
+    {
+        out(k, l+1, 0, 0 ) = xtminus1(0)-gradtminus1(0)*dt + root_2dt*gsl_ran_gaussian(r, exp( log_sigma ));
+        out(k, l+1, 0, 1 ) = xtminus1(1)-gradtminus1(1)*dt + root_2dt*gsl_ran_gaussian(r, exp( log_sigma ));  
+    }
 }
 
 void LangevinDynamics::output_file_timeseries(ParameterChainType &ccc, SigmaChainType &sss, std::ofstream &mcmc_file)

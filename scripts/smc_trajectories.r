@@ -9,10 +9,15 @@ probs = read.table("ts_smc_bridge_probs.txt", header=FALSE)
 
 num_particles = length(names(obs))/2
 
-min_x = min(obs[1:1])-0.01
-max_x = max(obs[1:1])+0.075
-min_y = min(obs[2:2])-0.01
-max_y = max(obs[2:2])+0.025
+min_x = min(obs[1:1]) - 0.025
+max_x = max(obs[1:1]) + 0.065
+min_y = min(obs[2:2]) - 0.025
+max_y = max(obs[2:2]) + 0.025
+
+#min_x = -0.25
+#max_x = 2
+#min_y = -1
+#max_y = 0.25
 
 xlim <- c( min_x, max_x )
 ylim <- c( min_y, max_y )
@@ -21,7 +26,7 @@ x <- seq( min_x, max_x, len=100 )
 y <- seq( min_y, max_y, len=100 )
 z <- matrix( sin( 2*pi*(expand.grid(x,y)$Var1 + expand.grid(x,y)$Var2)) + cos( 2*pi*(expand.grid(x,y)$Var1 + expand.grid(x,y)$Var2)),length(x),length(y))
 Lab.palette <- colorRampPalette(c("Black","Red", "Yellow"), space = "rgb")
-filled.contour(x,y,z, xlab="x", ylab="y", xlim<-xlim, ylim<-ylim, nlevels=50, col=Lab.palette(128))
+filled.contour(x,y,z, xlab=expression(x), ylab=expression(y), xlim<-xlim, ylim<-ylim, nlevels=50, col=Lab.palette(128))
 #plot(obs[1:2], type="b", lty=3, col="blue", pch=20, xlab="x", ylab="y", xlim<-xlim, ylim<-ylim )
 num_particles = length(names(DF))/2
 
@@ -30,7 +35,7 @@ max_probs = max(probs)
 for(i in 1:num_particles)
 {
   d = as.numeric(1 - probs[i] / max_probs )
-  if (probs[i] < 0.10*max_probs) # && (probs[i]>0.01*max_probs))
+  if (probs[i] < 0.90*max_probs) # && (probs[i]>0.01*max_probs))
   {
     p_col = rgb(0.45,0.45,0.45)
     points(DF[(2*i-1):(2*i)], type="l", col=p_col)
@@ -41,7 +46,7 @@ for(i in 1:num_particles)
 for(i in 1:num_particles)
 {
     #d = as.numeric(1 - probs[i] / max_probs )
-    if (probs[i] > 0.10*max_probs)
+    if (probs[i] > 0.90*max_probs)
     {
         p_col = rgb(0,1,0)
         points(DF[(2*i-1):(2*i)], type="l", col=p_col, pch=3)

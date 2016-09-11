@@ -74,6 +74,40 @@ Vector2d FourierSeries::grad( double x, double y )
     return ret;
 }
 
+Matrix2d FourierSeries::hessian( double x, double y )
+{
+    Matrix2d ret(2,2);
+   
+    ComplexType h_xx(0,0);
+    ComplexType h_yy(0,0);
+    ComplexType h_xy(0,0);
+        
+    ComplexType mode;
+    ComplexType tmp;
+    
+    for( int i= -M; i<M+1; ++i )
+    for( int j= -M; j<M+1; ++j )
+    {
+        mode = get_mode( i, j );
+        tmp = mode * std::exp( _2PI_I*(i*x+j*y) );    
+        h_xx += ComplexType(i*i,0)*_2PI_I*_2PI_I*tmp;
+        h_yy += ComplexType(j*j,0)*_2PI_I*_2PI_I*tmp;
+        h_xy += ComplexType(i*j,0)*_2PI_I*_2PI_I*tmp;
+    }
+
+    ret(0,0) = std::real( h_xx );
+    ret(0,1) = std::real( h_xy );
+    ret(1,0) = std::real( h_xy );
+    ret(1,1) = std::real( h_yy );
+    
+    return ret;
+}
+
+Matrix2d FourierSeries::hessian( Vector2d &v )
+{
+    return hessian( v(0), v(1) );
+}
+
 Vector2d FourierSeries::grad( Vector2d v )
 {    
     return grad( v(0), v(1) );

@@ -164,7 +164,7 @@ template<class Dynamics_>
 void LikelihoodFreeMCMC<Dynamics_>::propose( gsl_rng *r )
 {   
     double log_sigma_proposal_standard_deviation = _opts.parameter_proposal_diffusion_sigma();
-    c_star = infer_drift_parameters ? _dynamics.sample_transition_density(r, c) : c;    
+    c_star = infer_drift_parameters ? _dynamics.sample_transition_density(r, c) : c;       
     log_sigma_star = infer_diffusion_parameters ? (gsl_ran_gaussian(r, log_sigma_proposal_standard_deviation ) + log_sigma) : log_sigma;
     setup_observed_starts( r, observed, x_star );
     trajectory( r, c_star, log_sigma_star, x_star );
@@ -177,14 +177,7 @@ double LikelihoodFreeMCMC<Dynamics_>::log_path_likelihood(  PathType &path, Para
     for( size_t k=0; k<K; ++k )
         for( size_t l=0; l<L; ++l )
         {
-            log_total += _dynamics.log_path_likelihood( path, c_, log_sigma_, observed, k, l, 0 );
-            /* NEVER DO THIS
-            if( l < L-1 )
-            {
-                for( size_t m=1; m<M; ++m )
-                    log_total += _dynamics.log_path_likelihood( path, c_, log_sigma_, observed, k, l, m );
-            }
-            */
+            log_total += _dynamics.log_p( observed, path, c_, log_sigma_, k, l );
         }
     return log_total;
 }
@@ -193,17 +186,9 @@ double LikelihoodFreeMCMC<Dynamics_>::log_path_likelihood(  PathType &path, Para
 template<class Dynamics_>
 void LikelihoodFreeMCMC<Dynamics_>::store_chain(int n)
 {
-    if (_opts.store_time_series())
-    {
-        for( size_t i=0; i<c_dim; ++i)
-            parameter_chain(n, i) = c(i);
-        log_sigma_chain(n) = log_sigma;
-    }
-    else
-    {
-        //c_average += c;
-        log_sigma_average += log_sigma;
-    }
+    for( size_t i=0; i<c_dim; ++i)
+        parameter_chain(n, i) = c(i);
+    log_sigma_chain(n) = log_sigma;
 }
 
 template<class Dynamics_>
@@ -217,23 +202,9 @@ void LikelihoodFreeMCMC<Dynamics_>::accept()
 template<class Dynamics_>
 void LikelihoodFreeMCMC<Dynamics_>::finish() 
 {
-    // experiment options
     mcmc_file.open( filename );
-    
-    if (_opts.store_time_series())
-    {
-
     _opts.print_header( mcmc_file );
     _dynamics.output_file_timeseries( parameter_chain, log_sigma_chain, mcmc_file );
-    
-    }
-    else
-    {
-        log_sigma_average /= N;
-        mcmc_file << "log_sigma_average" << std::endl;
-        mcmc_file << log_sigma_average << std::endl;
-    }
-    
     mcmc_file.close();
 }
 
@@ -272,7 +243,6 @@ template<class Dynamics_>
 void LikelihoodFreeMCMC<Dynamics_>::generate_observations(gsl_rng *r)
 {   
     double observation_sigma = _opts.observation_noise_sigma();
-    //std::cout << "LikelihoodFreeMCMC thinks that observation_noise_sigma is: " << observation_sigma << std::endl;
     double random_noise_x;
     double random_noise_y;
 

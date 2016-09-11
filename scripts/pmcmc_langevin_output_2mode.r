@@ -28,13 +28,18 @@ mcmcSummary2d <- function( mcmc_data )
 
 histgramsModes<-function( mcmc_data )
 {
-  par(mfrow = c(4, 2))
+  par(mfrow = c(4, 4))
   for(i in 1:4)
   {
-    hist(ts(mcmc_data[(i*2-1):(i*2-1)]), 60, main=sprintf("Re(mode %d)",i))      
-    hist(ts(mcmc_data[(i*2):(i*2)]), 60, main=sprintf("Im(mode %d)",i))      
+    mcmc_ts <- ts(mcmc_data[(i*2-1):(i*2-1)])
+    plot( density(mcmc_ts, adjust = 4), main=sprintf("Posterior Re %d", i) )
+    acf( mcmc_ts, main="ACF" )
+    mcmc_ts <-ts(mcmc_data[(i*2):(i*2)])
+    plot( density(mcmc_ts, adjust = 4), main=sprintf("Posterior Im %d", i) )
+    acf( mcmc_ts, main="ACF" )
   }
 }
+
 
 sigmaSummary <- function( mcmc_data )
 {
@@ -54,8 +59,8 @@ plotHistogramFromFilename<-function(f)
 {
   mcmc_data = read.table(f)
   #histgramsModes(mcmc_data)
-  #mcmcSummary2d(mcmc_data)
-  sigmaSummary(mcmc_data)
+  mcmcSummary2d(mcmc_data)
+  #sigmaSummary(mcmc_data)
 }
 
 par(mfrow = c(3, 3))

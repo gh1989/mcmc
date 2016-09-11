@@ -25,6 +25,9 @@ target_link_libraries( Grid FourierSeries )
 add_library(LangevinDynamics LangevinDynamics.cpp)
 target_link_libraries( LangevinDynamics FourierSeries Dynamics Options)
 
+add_library(CurvedSurfaceDynamics CurvedSurfaceDynamics.cpp)
+target_link_libraries( CurvedSurfaceDynamics FourierSeries Dynamics Options)
+
 add_library(BridgeDynamics BridgeDynamics.cpp)
 target_link_libraries( BridgeDynamics FourierSeries Dynamics Options )
 

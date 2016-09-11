@@ -82,6 +82,7 @@ public:
     void store_chain(int n);
     void resample_with_replacement(gsl_rng *r, size_t t);
     void setup_from_options(Options &o);
+    void log_particle_end_points( std::ofstream &endpoints_file);
     
     ParameterType& current_drift(){ return c; }
     double current_log_sigma() { return log_sigma; }
@@ -127,9 +128,6 @@ private:
     bool    infer_diffusion_parameters;
   
     // SMC/Particle vars
-    long double log_marginal_likelihood_c_star;
-    long double log_marginal_likelihood_c;
-    
     long double marginal_likelihood_c_star;
     long double marginal_likelihood_c;
     
@@ -148,8 +146,6 @@ void ParticleMCMC<Dynamics_>::accept()
 {  
     c = c_star;
     log_sigma = log_sigma_star;
-    
-    log_marginal_likelihood_c = log_marginal_likelihood_c_star;
     marginal_likelihood_c = marginal_likelihood_c_star;
 }
 
@@ -178,21 +174,24 @@ template<class Dynamics_>
 void ParticleMCMC<Dynamics_>::generate_observations(gsl_rng *r)
 {   
     double observation_sigma = _opts.observation_noise_sigma();
+    
     double random_noise_x;
     double random_noise_y;
 
+    // Generate observations from the real trajectories.
     for( size_t k=0; k<K; ++k )
     {
         for( size_t l=0; l<L; ++l )
         {   
             random_noise_y = gsl_ran_gaussian(r, observation_sigma );
-            random_noise_x = gsl_ran_gaussian(r, observation_sigma );                
-
+            random_noise_x = gsl_ran_gaussian(r, observation_sigma );          
+            
             observed(k, l, 0 ) = real(k, l, 0, 0 ) + random_noise_x;           
             observed(k, l, 1 ) = real(k, l, 0, 1 ) + random_noise_y;
         }   
     }
     
+    // Run SMC and store marginal_likelihood for time 0.
     marginal_likelihood_c = smc(r);
 }
 
@@ -201,10 +200,24 @@ void ParticleMCMC<Dynamics_>::generate_random_starts(gsl_rng *r, PathType &out )
 {
     for( size_t k=0; k<K; ++k )
     {
-        // Initialisation: random point inside [-1,1]X[-1,1].
-        out(k, 0, 0, 0 ) = 2.0*gsl_rng_uniform(r)-1;
-        out(k, 0, 0, 1 ) = 2.0*gsl_rng_uniform(r)-1;
+        // Initialisation: random point inside [0,1]X[0,1].
+        out(k, 0, 0, 0 ) = gsl_rng_uniform(r);
+        out(k, 0, 0, 1 ) = gsl_rng_uniform(r);
     }
+}
+
+template<class Dynamics_>
+void ParticleMCMC<Dynamics_>::log_particle_end_points( std::ofstream &endpoints_file )
+{
+    // A utility function for logging the ends of trajectories.
+    PathType the_path;
+    for( int i=0; i<num_particles; i++)
+    {
+        the_path = particles[i]->path(); 
+        for(int k=0; k<K; ++k)
+            endpoints_file << the_path(k,L-1,0,0) << "\t" << the_path(k,L-1,0,1) << "\t";
+    }
+    endpoints_file << std::endl;
 }
 
 template<class Dynamics_>
@@ -218,22 +231,27 @@ void ParticleMCMC<Dynamics_>::generate_true_trajectory(gsl_rng *r)
 template<class Dynamics_>
 void ParticleMCMC<Dynamics_>::propose( gsl_rng *r )
 {
+    // With what standard deviation to propose log(sigma_d)?
     double log_sigma_proposal_standard_deviation = _opts.parameter_proposal_diffusion_sigma();
+    
+    // If inferring drift parameters (which actually means inferring modes, in the curved surface implementation
+    // these modes are included in the drift term, too.
     c_star = infer_drift_parameters ? _dynamics.sample_transition_density(r, c) : c;    
+    
+    // If inferring diffusion constant...
     log_sigma_star = infer_diffusion_parameters ? (gsl_ran_gaussian(r, log_sigma_proposal_standard_deviation ) + log_sigma) : log_sigma;
+    
+    // Setup the proposal in line with observations for parallel chains.
     setup_observed_starts( r, observed, x_star );
+    
+    // Simulate trajectories.
     trajectory( r, c_star, log_sigma_star, x_star );
 
-    marginal_likelihood_c_star = smc( r );
-    log_marginal_likelihood_c_star = log( marginal_likelihood_c_star );
+    // Run SMC store new marginal likelihood.
+    marginal_likelihood_c_star = smc( r );    
     
-    std::cout << "marginal_likelihood_c_star: " << marginal_likelihood_c_star << std::endl;
-    std::cout << "marginal_likelihood_c: " << marginal_likelihood_c << std::endl;
-    
-    // FYI...
-    //std::cout << "log_marginal_likelihood_c_star: " << log_marginal_likelihood_c_star << std::endl;
-    //std::cout << "log_marginal_likelihood_c: " << log_marginal_likelihood_c << std::endl;
-       
+    std::cout << "[Debug] marginal_likelihood_c_star: " << marginal_likelihood_c_star   << std::endl;
+    std::cout << "[Debug] marginal_likelihood_c: "      << marginal_likelihood_c        << std::endl;       
 }
 
 template<class Dynamics_>
@@ -242,7 +260,6 @@ void ParticleMCMC<Dynamics_>::setup_observed_starts(  gsl_rng *r,
                                                       PathType &out )
 {
     double sigma = _opts.observation_noise_sigma();
-    //std::cout << "ParticleMCMC thinks that observation_noise_sigma is: " << sigma << std::endl;
     for( size_t k=0; k<K; ++k )
     {
         out(k, 0, 0, 0 ) = y(k, 0, 0);
@@ -279,7 +296,7 @@ template<class Dynamics_>
 double ParticleMCMC<Dynamics_>::log_acceptance_probability()
 {
     long double log_total = 0;    
-    // Sigma
+
     if( infer_diffusion_parameters )
     {
         log_total += _dynamics.log_prior_sigma(log_sigma_star);
@@ -291,10 +308,7 @@ double ParticleMCMC<Dynamics_>::log_acceptance_probability()
         log_total += _dynamics.log_prior(c_star);
         log_total -= _dynamics.log_prior(c); 
     }
-    
-    //log_total += log_marginal_likelihood_c_star;
-    //log_total -= log_marginal_likelihood_c;
-    
+   
     log_total += log( marginal_likelihood_c_star / marginal_likelihood_c );
     
     return log_total;
@@ -305,40 +319,42 @@ template<class Dynamics_>
 long double ParticleMCMC<Dynamics_>::smc(gsl_rng *r)
 {
     double sigma = _opts.observation_noise_sigma();
-    double a_constant = 0.5 / (sqrt(2*M_PI)*sigma );
+    double a_constant = 0.5 / ( pow(2*M_PI*sigma*sigma, 1.5) ); // WHY was this not 3/2 ???
     double current_mean;
     double total;
-    Tensor<long double, 1> phat(L);
     
+    // The marginal likelihood estimate evolves in time, updated after each SMC loop below.
+    Tensor<long double, 1> marginal_likelihood_estimate(L);
+    
+    // Align all particles at the start of the observed.
     for(size_t i=0; i<num_particles; ++i)     
         particles[i]->setup_starts( r, observed );
     
+    // Calculate the unnormalised weights for each partical, store in W(0,i).
     for(size_t i=0; i<num_particles; ++i)  
         W(0, i) = particles[i]->unnormal_weight(0, c_star, log_sigma_star, observed);
         
+    // Calculate the mean of the unnormalised weights at time 0.
     total = 0;
     for(size_t i=0; i<num_particles; ++i) 
         total += a_constant*exp( W(0, i) );   
     current_mean = total / num_particles;
-          
-    /*
-    for(size_t i=0; i<num_particles; ++i)
-        phat(0) += W(0, i); 
-    */
     
-    phat(0) = current_mean;
+    // Marginal likelihood estimate at time 0.
+    marginal_likelihood_estimate(0) = current_mean;
     
+    // Resample.
     resample_with_replacement(r, 0);   
-    
-    std::cout << "c_star" << c_star << std::endl;
-    std::cout << "log_sigma_star" << log_sigma_star << std::endl;
 
     for(size_t t=1; t<L; ++t)
     {
         // Generate particle samples.
         for(size_t i=0; i<num_particles; ++i)     
         {
+            // Forward simulate particle i, from t-1 to t incrementally in M steps.
             particles[i]->forward_sim(r, c_star, log_sigma_star, observed, t );
+            
+            // The unnormalised log weight at time t for particle i. p( y | x, c ).
             W(t, i) = particles[i]->unnormal_weight(t, c_star, log_sigma_star, observed);
         }
         
@@ -347,40 +363,44 @@ long double ParticleMCMC<Dynamics_>::smc(gsl_rng *r)
         for(size_t i=0; i<num_particles; ++i) 
             total += a_constant*exp( W(t, i) );   
         current_mean = total / num_particles;
-       
-        phat(t) = phat(t-1)*current_mean;
         
-        /*
-        for(size_t i=0; i<num_particles; ++i)
-            phat(t) += W(t, i); 
-        */
+        // \hat{p}(y(t)|x) =\hat{p}(y(t-1)|x) * mean( unnormalised weights ).
+        marginal_likelihood_estimate(t) = marginal_likelihood_estimate(t-1)*current_mean;   
         
-        
-        
-        // Resample the particles based on weights.
         resample_with_replacement(r, t);
     }
 
     // Return the log marginal estimate.
-    return phat(L-1);
+    return marginal_likelihood_estimate(L-1);
 }
 
 template<class Dynamics_>
 void ParticleMCMC<Dynamics_>::resample_with_replacement(gsl_rng *r, size_t t)
 {    
-    resampled = std::move( particles ); // particles of size zero now.
+    // Move particles to resampled.
+    resampled = std::move( particles );
+    
     unsigned int resample_particle_index;
     double p[num_particles];
+    
+    // Set of unnormalised weights.
     for( size_t i=0; i<num_particles; ++i )
         p[i] = exp( W(t, i) );
 
     gsl_ran_discrete_t *g;
     g = gsl_ran_discrete_preproc(num_particles, p);
    
+    // Create a copy of the weights
+    auto resampled_W = W;
+    
     for( size_t i=0; i<num_particles; ++i )
     {
+        // Random index to resample a particle
         resample_particle_index = gsl_ran_discrete(r, g);
         particles.push_back( resampled[resample_particle_index] );
+        
+        // Push back puts it on the end of the vector...
+        W(t, num_particles - i - 1) = resampled_W(t, resample_particle_index);
     }
 }
 

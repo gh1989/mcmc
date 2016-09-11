@@ -33,6 +33,9 @@ public:
     Vector2d grad( Vector2d );
     Vector2d grad( double x, double y );
 
+    Matrix2d hessian(  Vector2d &v  );
+    Matrix2d hessian( double x, double y);
+    
     double evaluate( Vector2d );
     double evaluate( double x, double y );
 

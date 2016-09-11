@@ -11,14 +11,10 @@
 #include "Particle.h"
 
 /*
-./tests/TestVector -M 30 -Q 500 -o 0.01 -p 0.0002 -K 1 -l 0.1 -P 4
+./tests/TestBootstrap -M 30 -Q 500 -o 0.01 -p 0.0002 -K 1 -l 0.1 -P 4
 */
 
 using namespace std;
-
-/*
-The purpose of these tests is to work out what is breaking
-*/
 
 int main( int argc, char *argv[] )
 {
@@ -34,7 +30,7 @@ int main( int argc, char *argv[] )
     size_t K = o.parallel_paths();
     size_t L = o.path_length();
     size_t M = o.extra_data_ratio();
-   
+
     std::cout<< "M = " << M << std::endl;
  
     auto ld = LangevinDynamics(o);
@@ -93,6 +89,7 @@ int main( int argc, char *argv[] )
     }
     
     Tensor<double, 2> W(L,num_particles);
+    Tensor<double, 2> resampled_W(L,num_particles);
     double total = 0;
 
     for(size_t i=0; i<num_particles; ++i)
@@ -109,6 +106,8 @@ int main( int argc, char *argv[] )
     for(size_t i=0; i<num_particles; ++i) 
         total += exp( W(0, i) ); 
 
+    double sigma = o.observation_noise_sigma();
+    double a_constant = 0.5 / ( pow( 2*M_PI*sigma*sigma, 1.5 ) );
     
     for(size_t i=0; i<num_particles; ++i)
         phat(0) += a_constant*exp( particles[i]->unnormal_weight(0, c, log_sigma, observed) );
@@ -124,17 +123,16 @@ int main( int argc, char *argv[] )
     
     resampled = particles;
     
+    resampled_W = W;
     for( size_t i=0; i<num_particles; ++i )
     {
         resample_particle_index = gsl_ran_discrete(r, g);
         particles[i] = resampled[resample_particle_index];
+        W(0,i) = resampled_W(0, resample_particle_index);
         std::cout << "Swapping particle " << i << " for particle " << resample_particle_index << std::endl;   
         std::cout << p[i] <<" against "<< p[resample_particle_index] <<std::endl;
     }
 
-    double sigma = _opts.observation_noise_sigma();
-    double a_constant = 0.5 / (sqrt(2*M_PI)*sigma );
-    
     for(size_t t=1; t<L; ++t)  
     {   
         for(size_t i=0; i<num_particles; ++i)
@@ -160,10 +158,12 @@ int main( int argc, char *argv[] )
         gsl_ran_discrete_t *g;
         g = gsl_ran_discrete_preproc(num_particles, p);
         
+        resampled_W = W;
         for( size_t i=0; i<num_particles; ++i )
         {
             resample_particle_index = gsl_ran_discrete(r, g);
             particles[i] = resampled[resample_particle_index];
+            W(t,i) = resampled_W(t, resample_particle_index);
             std::cout << "Swapping particle " << i << " for particle " << resample_particle_index << std::endl;   
             std::cout << p[i] <<" against "<< p[resample_particle_index] <<std::endl;
         }
@@ -171,7 +171,7 @@ int main( int argc, char *argv[] )
         std::cout<<"total:" << total << std::endl;
         std::cout<<"(1.0/num_particles):" << (1.0/num_particles) << std::endl;
         std::cout<<"phat(t-1)"<< "with t-1=" << t-1 << " = " << phat(t-1) << std::endl; 
-        
+        double current_mean;
         total = 0;
         for(size_t i=0; i<num_particles; ++i) 
             total += a_constant*exp( W(0, i) );   

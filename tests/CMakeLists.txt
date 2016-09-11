@@ -23,8 +23,11 @@ target_link_libraries(TestLangevin LangevinDynamics gsl gslcblas Options)
 add_executable(TestRandom TestRandom.cpp)
 target_link_libraries(TestRandom gsl gslcblas)
 
-add_executable(TestVector TestVector.cpp)
-target_link_libraries(TestVector LangevinDynamics BridgeDynamics gsl gslcblas Options)
+add_executable(TestBootstrap TestBootstrap.cpp)
+target_link_libraries(TestBootstrap LangevinDynamics BridgeDynamics gsl gslcblas Options)
+
+add_executable(CurvedSurfaceTests CurvedSurfaceTests.cpp)
+target_link_libraries(CurvedSurfaceTests CurvedSurfaceDynamics BridgeDynamics gsl gslcblas Options)
 
 add_executable(TestDiffusionBridge TestDiffusionBridge.cpp)
 target_link_libraries(TestDiffusionBridge LangevinDynamics BridgeDynamics gsl gslcblas Options)

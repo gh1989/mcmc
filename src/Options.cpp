@@ -144,6 +144,9 @@ void Options::print_header( std::ofstream &file )
     file << "#_extra_data_ratio: " << _extra_data_ratio <<std::endl;
     file << "#_parallel_paths: "<< _parallel_paths <<std::endl;
     file << "#_parameter_proposal_sigma: " << _parameter_proposal_sigma <<std::endl;
+    file << "#_number_particles: " << _number_particles << std::endl;
+    file << "#_cutoff: " << _cutoff << std::endl;
+    file << "#_single_mode:" << _single_mode << std::endl;
 }
 
 void Options::print_options( std::ostream &o )

@@ -5,13 +5,26 @@
 using namespace MCMC;
 
 
+double OUDynamics::log_p( CoarsePathType &y,  PathType &x, ParameterType &c, double log_sigma, int k, int l)
+{
+    
+    double obs_sigma =  _opts.observation_noise_sigma();
+    double exponential_constant_obs  = 0.5/(obs_sigma*obs_sigma);
+    double log_total = 0;
+
+    log_total -= exponential_constant_obs * pow( x(k, l, 0, 0 ) - y(k, l, 0), 2);
+    log_total -= exponential_constant_obs * pow( x(k, l, 0, 1 ) - y(k, l, 1), 2);
+    
+    return log_total;
+}
+
 double OUDynamics::sample_transition_density(gsl_rng *r, double c )
 {
     double sigma = _opts.parameter_proposal_sigma();
     return gsl_ran_gaussian(r, sigma ) + c;
 }
 
-OUDynamics::ParameterType& OUDynamics::sample_transition_density(gsl_rng *r, ParameterType& C)
+OUDynamics::ParameterType OUDynamics::sample_transition_density(gsl_rng *r, ParameterType& C)
 {
     ParameterType C_star(1);
     double sigma = _opts.parameter_proposal_sigma();

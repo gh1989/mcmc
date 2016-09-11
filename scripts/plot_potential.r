@@ -26,5 +26,5 @@ plotEndPointsHex <- function( file_name )
   hexbinplot(x~y, xbins=100, xlim=c(-1,1), ylim=c(-1,1))
 }
 
-list_of_files = list.files(pattern="end_points.*.txt")
+list_of_files = list.files(pattern="SMC.*EndPoints.*")
 lapply(list_of_files, plotEndPointsHex)

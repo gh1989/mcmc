@@ -66,7 +66,7 @@ Vector2d Grid::interpolate_gradient( double x, double y )
     Vector2d y_diffs;
     Matrix2d grid_vals;
 
-       /*
+    /*
      * Find the respective index
      */
     assert( ( x <= max_x ) && ( x >= min_x ) );
@@ -120,9 +120,8 @@ Vector2d Grid::interpolate_gradient( double x, double y )
     x_diffs << x2-x, x-x1;
     y_diffs << y2-y, y-y1;
     
-    //printf("2...");
     double v11, v12, v21, v22;
-      v11 = grad_discrete_range(lower_x_idx, 2*lower_y_idx);
+    v11 = grad_discrete_range(lower_x_idx, 2*lower_y_idx);
     v21 = grad_discrete_range(lower_x_idx, 2*upper_y_idx);
     v12 = grad_discrete_range(upper_x_idx, 2*lower_y_idx);
     v22 = grad_discrete_range(upper_x_idx, 2*upper_y_idx);
@@ -131,7 +130,7 @@ Vector2d Grid::interpolate_gradient( double x, double y )
                  v21, v22;
     
     ret(0) = coefficient*x_diffs.transpose()*grid_vals*y_diffs;
-    //printf("3...");
+
     v11 = grad_discrete_range(lower_x_idx, 2*lower_y_idx+1);
     v21 = grad_discrete_range(lower_x_idx, 2*upper_y_idx+1);
     v12 = grad_discrete_range(upper_x_idx, 2*lower_y_idx+1);
@@ -139,16 +138,16 @@ Vector2d Grid::interpolate_gradient( double x, double y )
     
     grid_vals << v11, v12, 
                  v21, v22;
-    //printf("4...");
+
     ret(1) = coefficient*x_diffs.transpose()*grid_vals*y_diffs;
-    //printf("5... \n");
+
     return ret;
 }
 
 void Grid::discretise( FourierSeries *pf_series ) 
 {
     Vector2d tmp;
-    //printf("[discretise] Got here! \n");
+
     for( int i=0; i<Nx; ++i )
         for( int j=0; j<Ny; ++j )
         {
